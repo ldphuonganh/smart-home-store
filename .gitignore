@@ -1,0 +1,26 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Java / Maven
+**/target/
+**/.mvn/timing.properties
+
+# Node.js
+**/node_modules/
+**/dist/
+
+# Environment files
+.env
+.env.*
+
+# Temporary files
+*.log
+*.tmp
+
+# Old Git history from teacher repository
+.git-old-teacher/
+
+# Operating system files
+.DS_Store
+Thumbs.db

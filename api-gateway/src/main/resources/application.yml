@@ -1,0 +1,161 @@
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:5173"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+      routes:
+
+        # =========================================================
+        # AUTH SERVICE - port 8081
+        # =========================================================
+
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/auth/(?<segment>.*), /auth/${segment}
+
+        # API KEY - Auth Service
+        - id: auth-service-apikeys
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/api-keys,/api/api-keys/**
+          filters:
+            - RewritePath=/api/api-keys/(?<segment>.*), /api-keys/${segment}
+            - RewritePath=/api/api-keys, /api-keys
+
+
+        # =========================================================
+        # PRODUCT SERVICE - port 8082
+        # =========================================================
+
+        # GET /api/products
+        - id: product-service-list
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/products
+          filters:
+            - RewritePath=/api/products, /products
+
+        # /api/products/{id}
+        - id: product-service-detail
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - RewritePath=/api/products/(?<segment>.*), /products/${segment}
+
+        # CATEGORY
+        - id: product-service-categories
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/categories,/api/categories/**
+          filters:
+            - RewritePath=/api/categories/(?<segment>.*), /categories/${segment}
+            - RewritePath=/api/categories, /categories
+
+        # PUBLIC PRODUCT API
+        - id: product-service-public-list
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/public/products
+          filters:
+            - RewritePath=/api/public/products, /public/products
+
+        - id: product-service-public-detail
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/public/products/**
+          filters:
+            - RewritePath=/api/public/products/(?<segment>.*), /public/products/${segment}
+
+
+        # =========================================================
+        # CART SERVICE - port 8084
+        # =========================================================
+
+        # /api/cart
+        - id: cart-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/cart,/api/cart/**
+          filters:
+            - RewritePath=/api/cart/(?<segment>.*), /cart/${segment}
+            - RewritePath=/api/cart, /cart
+
+
+        # =========================================================
+        # ORDER SERVICE - port 8083
+        # =========================================================
+
+        # /api/orders
+        - id: order-service-list
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/orders
+          filters:
+            - RewritePath=/api/orders, /orders
+
+        # /api/orders/**
+        # Ví dụ:
+        # /api/orders/my
+        # /api/orders/1
+        # /api/orders/1/cancel
+        # /api/orders/1/status
+        - id: order-service-detail
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - RewritePath=/api/orders/(?<segment>.*), /orders/${segment}
+
+
+        # =========================================================
+        # PAYMENT SERVICE - port 8085
+        # =========================================================
+
+        # /api/payments
+        - id: payment-service-list
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/payments
+          filters:
+            - RewritePath=/api/payments, /payments
+
+        # /api/payments/**
+        - id: payment-service-detail
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - RewritePath=/api/payments/(?<segment>.*), /payments/${segment}
+
+
+server:
+  port: 8080
+
+
+# =========================================================
+# JWT
+# =========================================================
+
+jwt:
+  secret: CRS-Microservices-Secret-Key-Nam-3-Hoc-Ky-2026-Doi-Trong-Thuc-Te
+
+
+# =========================================================
+# ACTUATOR / GATEWAY
+# =========================================================
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: gateway
