@@ -31,7 +31,7 @@ export default function ProtectedRoute({
   ) {
     return (
       <Navigate
-        to="/courses"
+        to="/products"
         replace
       />
     );
