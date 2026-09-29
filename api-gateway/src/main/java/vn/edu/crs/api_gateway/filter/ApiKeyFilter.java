@@ -17,8 +17,8 @@ public class ApiKeyFilter implements GlobalFilter, Ordered {
     private final AuthServiceClient authServiceClient;
     private final ApiKeyValidationCache cache;
 
-    private static final String PARTNER_PATH = "/api/public/courses";
-    private static final String REQUIRED_SCOPE = "courses:read";
+    private static final String PARTNER_PATH = "/api/public/products";
+    private static final String REQUIRED_SCOPE = "products:read";
 
     // Constructor thay thế cho @RequiredArgsConstructor
     public ApiKeyFilter(AuthServiceClient authServiceClient, ApiKeyValidationCache cache) {
@@ -55,8 +55,8 @@ public class ApiKeyFilter implements GlobalFilter, Ordered {
     }
 
     private Mono<Void> reject(ServerWebExchange exchange) {
-        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-        return exchange.getResponse().setComplete();
+        return GatewayErrors.write(exchange, HttpStatus.FORBIDDEN,
+                "API Key khong hop le, het han, bi thu hoi hoac thieu scope " + REQUIRED_SCOPE);
     }
 
     @Override

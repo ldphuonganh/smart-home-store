@@ -32,6 +32,15 @@ spring:
             - RewritePath=/api/api-keys, /api-keys
 
 
+        # ADMIN quản lý tài khoản - Auth Service
+        # /api/admin/users/** -> /admin/users/**
+        - id: auth-service-admin
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - RewritePath=/api/admin/(?<segment>.*), /admin/${segment}
+
         # =========================================================
         # PRODUCT SERVICE - port 8082
         # =========================================================
@@ -89,6 +98,16 @@ spring:
           filters:
             - RewritePath=/api/cart/(?<segment>.*), /cart/${segment}
             - RewritePath=/api/cart, /cart
+
+
+        # /api/wishlist -> cart-service /wishlist
+        - id: cart-service-wishlist
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/wishlist,/api/wishlist/**
+          filters:
+            - RewritePath=/api/wishlist/(?<segment>.*), /wishlist/${segment}
+            - RewritePath=/api/wishlist, /wishlist
 
 
         # =========================================================
