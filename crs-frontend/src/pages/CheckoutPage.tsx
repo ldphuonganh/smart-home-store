@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import {
+  Link,
   useNavigate,
   useLocation
 } from 'react-router-dom';
@@ -39,17 +40,10 @@ export default function CheckoutPage() {
     useState('COD');
 
   const [items, setItems] =
+    // Sản phẩm được truyền sang từ trang sản phẩm ("Mua ngay") hoặc giỏ hàng.
+    // Không còn dữ liệu giả: giá cuối cùng do order-service lấy từ product-service.
     useState<OrderItemRequest[]>(
-      state?.items && state.items.length > 0
-        ? state.items
-        : [
-            {
-              productId: 1,
-              productName: 'Smart Sofa',
-              price: 12990000,
-              quantity: 1
-            }
-          ]
+      state?.items ?? []
     );
 
   const [loading, setLoading] =
@@ -365,6 +359,23 @@ export default function CheckoutPage() {
           </div>
 
         </div>
+
+        {items.length === 0 && (
+          <div
+            style={{
+              padding: 16,
+              marginBottom: 20,
+              border: '1px dashed #999',
+              borderRadius: 8,
+              textAlign: 'center'
+            }}
+          >
+            Chưa có sản phẩm nào để thanh toán.{' '}
+            <Link to="/products">
+              Chọn sản phẩm
+            </Link>
+          </div>
+        )}
 
         {/* SẢN PHẨM */}
         <div

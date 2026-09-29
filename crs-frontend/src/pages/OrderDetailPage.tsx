@@ -238,6 +238,16 @@ export default function OrderDetailPage() {
           {order.paymentMethod}
         </p>
 
+        <p>
+          <strong>
+            Thanh toán:
+          </strong>
+          {' '}
+          {order.paymentStatus === 'PAID'
+            ? 'Đã thanh toán'
+            : 'Chưa thanh toán'}
+        </p>
+
       </div>
 
       {/* SẢN PHẨM */}
@@ -350,6 +360,23 @@ export default function OrderDetailPage() {
         >
           ← Đơn hàng của tôi
         </Link>
+
+        {order.paymentMethod === 'BANK_TRANSFER' &&
+          order.paymentStatus !== 'PAID' &&
+          order.status === 'PENDING' && (
+          <Link
+            to={`/payment/${order.id}`}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 5,
+              background: '#15803d',
+              color: 'white',
+              textDecoration: 'none'
+            }}
+          >
+            Thanh toán ngay
+          </Link>
+        )}
 
         {order.status ===
           'PENDING' && (
