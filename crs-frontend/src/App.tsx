@@ -16,6 +16,10 @@ import MyOrdersPage from './pages/MyOrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
 
+// TV3 - Cart + Wishlist
+import CartPage from './pages/CartPage';
+import WishlistPage from './pages/WishlistPage';
+
 function App() {
   return (
     <>
@@ -38,6 +42,28 @@ function App() {
           path="/login"
           element={
             <LoginPage />
+          }
+        />
+
+        {/* =========================
+            TV3 - CART + WISHLIST
+           ========================= */}
+
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute requiredRole="CUSTOMER">
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute requiredRole="CUSTOMER">
+              <WishlistPage />
+            </ProtectedRoute>
           }
         />
 

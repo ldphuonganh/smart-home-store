@@ -49,6 +49,14 @@ export default function Navbar() {
       {isAuthenticated &&
         user?.role === 'CUSTOMER' && (
           <>
+            <Link to="/cart">
+              Giỏ hàng
+            </Link>
+
+            <Link to="/wishlist">
+              Yêu thích
+            </Link>
+
             <Link to="/checkout">
               Thanh toán
             </Link>

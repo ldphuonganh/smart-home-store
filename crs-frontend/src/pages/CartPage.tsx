@@ -1,477 +1,179 @@
-import {
-  useEffect,
-  useState
-} from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-import {
-  addCartItem,
-  clearCart,
-  getCart,
-  removeCartItem,
-  updateCartItem
-} from '../api/cartApi';
+import { clearCart, getCart, removeCartItem, updateCartItem } from '../api/cartApi';
+import ItemThumb from '../components/cart/ItemThumb';
+import type { Cart, CartItem } from '../types/cart';
+import { formatPrice, getErrorMessage } from '../utils/format';
+import './cart.css';
 
-import type {
-  Cart
-} from '../types/cart';
-
+/** Trang giỏ hàng (/cart) - chỉ CUSTOMER. */
 export default function CartPage() {
+  const navigate = useNavigate();
+  const [cart, setCart] = useState<Cart | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<number | null>(null);
 
-  const [cart, setCart] =
-    useState<Cart | null>(null);
-
-  const [productId, setProductId] =
-    useState('');
-
-  const [quantity, setQuantity] =
-    useState('1');
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [message, setMessage] =
-    useState('');
-
-  const [error, setError] =
-    useState('');
-
-  const loadCart = async () => {
-
-    try {
-
-      setLoading(true);
-      setError('');
-
-      const response =
-        await getCart();
-
-      setCart(response.data);
-
-    } catch (err) {
-
-      console.error(err);
-
-      setError(
-        'Khong tai duoc gio hang.'
-      );
-
-    } finally {
-
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-
-    loadCart();
-
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    getCart()
+      .then(({ data }) => setCart(data))
+      .catch((err) => setError(getErrorMessage(err, 'Không tải được giỏ hàng')))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleAddItem = async () => {
+  useEffect(() => {
+    load();
+  }, [load]);
 
-    const productIdNumber =
-      Number(productId);
-
-    const quantityNumber =
-      Number(quantity);
-
-    if (
-      !productId ||
-      !Number.isInteger(productIdNumber) ||
-      productIdNumber <= 0
-    ) {
-
-      setError(
-        'Product ID phai la so nguyen lon hon 0.'
-      );
-
-      return;
-    }
-
-    if (
-      !quantity ||
-      !Number.isInteger(quantityNumber) ||
-      quantityNumber <= 0
-    ) {
-
-      setError(
-        'So luong phai la so nguyen lon hon 0.'
-      );
-
-      return;
-    }
-
+  // Mỗi thao tác trả về giỏ mới -> cập nhật ngay, không cần gọi lại GET
+  const runAction = async (itemId: number | null, action: () => Promise<{ data: Cart }>) => {
+    setActionError(null);
+    setBusyId(itemId);
     try {
-
-      setError('');
-      setMessage('');
-
-      const response =
-        await addCartItem(
-          productIdNumber,
-          quantityNumber
-        );
-
-      setCart(response.data);
-
-      setProductId('');
-      setQuantity('1');
-
-      setMessage(
-        'Da them san pham vao gio hang.'
-      );
-
+      const { data } = await action();
+      setCart(data);
     } catch (err) {
-
-      console.error(err);
-
-      setError(
-        'Them san pham vao gio hang that bai.'
-      );
+      setActionError(getErrorMessage(err, 'Thao tác thất bại'));
+    } finally {
+      setBusyId(null);
     }
   };
 
-  const handleIncrease =
-    async (
-      id: number,
-      currentQuantity: number
-    ) => {
+  const changeQuantity = (item: CartItem, quantity: number) => {
+    if (quantity < 1 || quantity === item.quantity) return;
+    runAction(item.id, () => updateCartItem(item.id, quantity));
+  };
 
-      try {
+  const removeItem = (item: CartItem) => {
+    if (!window.confirm(`Xoá "${item.productName}" khỏi giỏ hàng?`)) return;
+    runAction(item.id, () => removeCartItem(item.id));
+  };
 
-        setError('');
-        setMessage('');
+  const handleClear = async () => {
+    if (!window.confirm('Xoá toàn bộ giỏ hàng?')) return;
+    try {
+      await clearCart();
+      load();
+    } catch (err) {
+      setActionError(getErrorMessage(err, 'Xoá giỏ hàng thất bại'));
+    }
+  };
 
-        const response =
-          await updateCartItem(
-            id,
-            currentQuantity + 1
-          );
+  const availableItems = cart?.items.filter((i) => i.available) ?? [];
 
-        setCart(response.data);
-
-      } catch (err) {
-
-        console.error(err);
-
-        setError(
-          'Khong the tang so luong.'
-        );
+  /** Sang trang Checkout của TV4 với các sản phẩm còn bán. */
+  const handleCheckout = () => {
+    navigate('/checkout', {
+      state: {
+        fromCart: true,
+        items: availableItems.map((i) => ({
+          productId: i.productId,
+          productName: i.productName,
+          price: i.price,
+          quantity: i.quantity
+        }))
       }
-    };
+    });
+  };
 
-  const handleDecrease =
-    async (
-      id: number,
-      currentQuantity: number
-    ) => {
+  if (loading && !cart) {
+    return <div className="ct-page"><div className="ct-state">Đang tải giỏ hàng...</div></div>;
+  }
 
-      if (currentQuantity <= 1) {
-        return;
-      }
-
-      try {
-
-        setError('');
-        setMessage('');
-
-        const response =
-          await updateCartItem(
-            id,
-            currentQuantity - 1
-          );
-
-        setCart(response.data);
-
-      } catch (err) {
-
-        console.error(err);
-
-        setError(
-          'Khong the giam so luong.'
-        );
-      }
-    };
-
-  const handleRemove =
-    async (id: number) => {
-
-      try {
-
-        setError('');
-        setMessage('');
-
-        await removeCartItem(id);
-
-        await loadCart();
-
-        setMessage(
-          'Da xoa san pham khoi gio hang.'
-        );
-
-      } catch (err) {
-
-        console.error(err);
-
-        setError(
-          'Xoa san pham that bai.'
-        );
-      }
-    };
-
-  const handleClear =
-    async () => {
-
-      if (
-        !window.confirm(
-          'Ban co chac muon xoa toan bo gio hang?'
-        )
-      ) {
-        return;
-      }
-
-      try {
-
-        setError('');
-        setMessage('');
-
-        await clearCart();
-
-        await loadCart();
-
-        setMessage(
-          'Da xoa toan bo gio hang.'
-        );
-
-      } catch (err) {
-
-        console.error(err);
-
-        setError(
-          'Xoa gio hang that bai.'
-        );
-      }
-    };
-
-  if (loading) {
-
+  if (error) {
     return (
-      <div style={{ padding: 24 }}>
-        Dang tai gio hang...
+      <div className="ct-page">
+        <div className="ct-state ct-error">
+          <p>{error}</p>
+          <button className="ct-btn" onClick={load}>Thử lại</button>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div
-      style={{
-        padding: 24,
-        maxWidth: 900,
-        margin: '0 auto'
-      }}
-    >
-
-      <h1>Gio hang</h1>
-
-      <div
-        style={{
-          border: '1px solid #ddd',
-          padding: 16,
-          marginBottom: 24,
-          borderRadius: 8
-        }}
-      >
-
-        <h2>Them san pham</h2>
-
-        <div
-          style={{
-            display: 'flex',
-            gap: 12,
-            flexWrap: 'wrap',
-            alignItems: 'center'
-          }}
-        >
-
-          <input
-            type="number"
-            min="1"
-            placeholder="Product ID"
-            value={productId}
-            onChange={(event) =>
-              setProductId(event.target.value)
-            }
-          />
-
-          <input
-            type="number"
-            min="1"
-            placeholder="So luong"
-            value={quantity}
-            onChange={(event) =>
-              setQuantity(event.target.value)
-            }
-          />
-
-          <button
-            onClick={handleAddItem}
-          >
-            Them vao gio
-          </button>
-
+  if (!cart || cart.items.length === 0) {
+    return (
+      <div className="ct-page">
+        <h1>Giỏ hàng</h1>
+        <div className="ct-state">
+          <p>Giỏ hàng đang trống.</p>
+          <Link to="/products">Tiếp tục mua sắm</Link>
         </div>
-
       </div>
+    );
+  }
 
-      {message && (
-        <p
-          style={{
-            color: 'green'
-          }}
-        >
-          {message}
-        </p>
-      )}
+  const overStock = availableItems.some((i) => i.quantity > i.stock);
 
-      {error && (
-        <p
-          style={{
-            color: 'red'
-          }}
-        >
-          {error}
-        </p>
-      )}
+  return (
+    <div className="ct-page">
+      <h1>Giỏ hàng ({cart.totalQuantity})</h1>
+      {actionError && <p className="ct-error">{actionError}</p>}
 
-      {!cart ||
-      cart.items.length === 0 ? (
-
-        <div>
-
-          <p>
-            Gio hang dang trong.
-          </p>
-
-        </div>
-
-      ) : (
-
-        <div>
-
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 16
-            }}
-          >
-
-            <h2>
-              San pham trong gio (
-              {cart.items.length})
-            </h2>
-
-            <button
-              onClick={handleClear}
-            >
-              Xoa tat ca
-            </button>
-
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 12
-            }}
-          >
-
-            {cart.items.map((item) => (
-
-              <div
-                key={item.id}
-                style={{
-                  border: '1px solid #ddd',
-                  borderRadius: 8,
-                  padding: 16,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: 12
-                }}
-              >
-
-                <div>
-
-                  <strong>
-                    Product ID: {item.productId}
-                  </strong>
-
-                  <div>
-                    So luong: {item.quantity}
-                  </div>
-
+      <div className="ct-layout">
+        <section>
+          {cart.items.map((item) => (
+            <div key={item.id} className={`ct-row ${item.available ? '' : 'ct-unavailable'}`}>
+              <ItemThumb imageUrl={item.imageUrl} alt={item.productName} />
+              <div>
+                <Link className="ct-name" to={`/products/${item.productId}`}>{item.productName}</Link>
+                <div className="ct-muted">
+                  {item.available ? `${formatPrice(item.price)} · còn ${item.stock}` : 'Sản phẩm không còn bán'}
                 </div>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 8,
-                    alignItems: 'center'
-                  }}
-                >
-
-                  <button
-                    onClick={() =>
-                      handleDecrease(
-                        item.id,
-                        item.quantity
-                      )
-                    }
-                    disabled={
-                      item.quantity <= 1
-                    }
-                  >
-                    -
-                  </button>
-
-                  <span>
-                    {item.quantity}
-                  </span>
-
-                  <button
-                    onClick={() =>
-                      handleIncrease(
-                        item.id,
-                        item.quantity
-                      )
-                    }
-                  >
-                    +
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      handleRemove(item.id)
-                    }
-                  >
-                    Xoa
-                  </button>
-
-                </div>
-
+                {item.available && item.quantity > item.stock && (
+                  <div className="ct-error">Vượt quá tồn kho, vui lòng giảm số lượng</div>
+                )}
               </div>
-
-            ))}
-
+              <div className="ct-qty">
+                <button
+                  className="ct-btn"
+                  disabled={busyId === item.id || item.quantity <= 1 || !item.available}
+                  onClick={() => changeQuantity(item, item.quantity - 1)}
+                >
+                  −
+                </button>
+                <span style={{ minWidth: 28, textAlign: 'center' }}>{item.quantity}</span>
+                <button
+                  className="ct-btn"
+                  disabled={busyId === item.id || !item.available || item.quantity >= item.stock}
+                  onClick={() => changeQuantity(item, item.quantity + 1)}
+                >
+                  +
+                </button>
+              </div>
+              <span className="ct-price">{item.available ? formatPrice(item.subtotal) : '—'}</span>
+              <button
+                className="ct-btn ct-btn-danger"
+                disabled={busyId === item.id}
+                onClick={() => removeItem(item)}
+              >
+                Xoá
+              </button>
+            </div>
+          ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
+            <Link to="/products">← Tiếp tục mua sắm</Link>
+            <button className="ct-btn ct-btn-danger" onClick={handleClear}>Xoá toàn bộ</button>
           </div>
+        </section>
 
-        </div>
-      )}
-
+        <aside className="ct-summary">
+          <strong>Tổng cộng</strong>
+          <span className="ct-price" style={{ fontSize: 24 }}>{formatPrice(cart.totalAmount)}</span>
+          <span className="ct-muted">Giá được cập nhật theo giá hiện tại của sản phẩm.</span>
+          <button
+            className="ct-btn ct-btn-primary"
+            disabled={availableItems.length === 0 || overStock}
+            onClick={handleCheckout}
+          >
+            Đặt hàng
+          </button>
+        </aside>
+      </div>
     </div>
   );
 }

@@ -1,32 +1,14 @@
 import axiosClient from './axiosClient';
 import type { Wishlist } from '../types/wishlist';
 
-export const getWishlist = () => {
-  return axiosClient.get<Wishlist>('/api/wishlist');
-};
+/** /api/wishlist/** -> cart-service :8084 /wishlist/** */
 
-export const addWishlistItem = (
-  productId: number
-) => {
-  return axiosClient.post<Wishlist>(
-    '/api/wishlist/items',
-    null,
-    {
-      params: {
-        productId,
-      },
-    }
-  );
-};
+export const getWishlist = () => axiosClient.get<Wishlist>('/api/wishlist');
 
-export const removeWishlistItem = (
-  id: number
-) => {
-  return axiosClient.delete(
-    `/api/wishlist/items/${id}`
-  );
-};
+export const addWishlistItem = (productId: number) =>
+  axiosClient.post<Wishlist>('/api/wishlist/items', { productId });
 
-export const clearWishlist = () => {
-  return axiosClient.delete('/api/wishlist');
-};
+export const removeWishlistItem = (id: number) =>
+  axiosClient.delete<Wishlist>(`/api/wishlist/items/${id}`);
+
+export const clearWishlist = () => axiosClient.delete<void>('/api/wishlist');

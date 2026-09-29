@@ -1,47 +1,17 @@
 import axiosClient from './axiosClient';
 import type { Cart } from '../types/cart';
 
-export const getCart = () => {
-  return axiosClient.get<Cart>('/api/cart');
-};
+/** /api/cart/** -> cart-service :8084 /cart/** (body JSON theo API Contract mục 28) */
 
-export const addCartItem = (
-  productId: number,
-  quantity: number
-) => {
-  return axiosClient.post<Cart>(
-    '/api/cart/items',
-    null,
-    {
-      params: {
-        productId,
-        quantity,
-      },
-    }
-  );
-};
+export const getCart = () => axiosClient.get<Cart>('/api/cart');
 
-export const updateCartItem = (
-  id: number,
-  quantity: number
-) => {
-  return axiosClient.put<Cart>(
-    `/api/cart/items/${id}`,
-    null,
-    {
-      params: {
-        quantity,
-      },
-    }
-  );
-};
+export const addCartItem = (productId: number, quantity: number) =>
+  axiosClient.post<Cart>('/api/cart/items', { productId, quantity });
 
-export const removeCartItem = (id: number) => {
-  return axiosClient.delete(
-    `/api/cart/items/${id}`
-  );
-};
+export const updateCartItem = (id: number, quantity: number) =>
+  axiosClient.put<Cart>(`/api/cart/items/${id}`, { quantity });
 
-export const clearCart = () => {
-  return axiosClient.delete('/api/cart');
-};
+export const removeCartItem = (id: number) =>
+  axiosClient.delete<Cart>(`/api/cart/items/${id}`);
+
+export const clearCart = () => axiosClient.delete<void>('/api/cart');

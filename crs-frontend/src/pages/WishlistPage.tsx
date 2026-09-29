@@ -1,335 +1,97 @@
-import {
-  useEffect,
-  useState
-} from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
-import {
-  addWishlistItem,
-  clearWishlist,
-  getWishlist,
-  removeWishlistItem
-} from '../api/wishlistApi';
+import { addCartItem } from '../api/cartApi';
+import { getWishlist, removeWishlistItem } from '../api/wishlistApi';
+import ItemThumb from '../components/cart/ItemThumb';
+import type { Wishlist, WishlistItem } from '../types/wishlist';
+import { formatPrice, getErrorMessage } from '../utils/format';
+import './cart.css';
 
-import type {
-  Wishlist
-} from '../types/wishlist';
-
+/** Trang sản phẩm yêu thích (/wishlist) - chỉ CUSTOMER. */
 export default function WishlistPage() {
+  const [wishlist, setWishlist] = useState<Wishlist | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const [wishlist, setWishlist] =
-    useState<Wishlist | null>(null);
-
-  const [productId, setProductId] =
-    useState('');
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [message, setMessage] =
-    useState('');
-
-  const [error, setError] =
-    useState('');
-
-  const loadWishlist = async () => {
-
-    try {
-
-      setLoading(true);
-      setError('');
-
-      const response =
-        await getWishlist();
-
-      setWishlist(response.data);
-
-    } catch (err) {
-
-      console.error(err);
-
-      setError(
-        'Khong tai duoc danh sach yeu thich.'
-      );
-
-    } finally {
-
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-
-    loadWishlist();
-
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    getWishlist()
+      .then(({ data }) => setWishlist(data))
+      .catch((err) => setError(getErrorMessage(err, 'Không tải được danh sách yêu thích')))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleAddItem = async () => {
+  useEffect(() => {
+    load();
+  }, [load]);
 
-    const productIdNumber =
-      Number(productId);
-
-    if (
-      !productId ||
-      !Number.isInteger(productIdNumber) ||
-      productIdNumber <= 0
-    ) {
-
-      setError(
-        'Product ID phai la so nguyen lon hon 0.'
-      );
-
-      return;
-    }
-
+  const remove = async (item: WishlistItem) => {
     try {
-
-      setError('');
-      setMessage('');
-
-      const response =
-        await addWishlistItem(
-          productIdNumber
-        );
-
-      setWishlist(response.data);
-
-      setProductId('');
-
-      setMessage(
-        'Da them san pham vao danh sach yeu thich.'
-      );
-
+      const { data } = await removeWishlistItem(item.id);
+      setWishlist(data);
     } catch (err) {
-
-      console.error(err);
-
-      setError(
-        'Them san pham vao danh sach yeu thich that bai.'
-      );
+      setMessage({ type: 'error', text: getErrorMessage(err, 'Xoá thất bại') });
     }
   };
 
-  const handleRemove =
-    async (id: number) => {
+  const moveToCart = async (item: WishlistItem) => {
+    try {
+      await addCartItem(item.productId, 1);
+      setMessage({ type: 'success', text: `Đã thêm "${item.productName}" vào giỏ hàng` });
+    } catch (err) {
+      setMessage({ type: 'error', text: getErrorMessage(err, 'Thêm vào giỏ thất bại') });
+    }
+  };
 
-      try {
-
-        setError('');
-        setMessage('');
-
-        await removeWishlistItem(id);
-
-        await loadWishlist();
-
-        setMessage(
-          'Da xoa san pham khoi danh sach yeu thich.'
-        );
-
-      } catch (err) {
-
-        console.error(err);
-
-        setError(
-          'Xoa san pham that bai.'
-        );
-      }
-    };
-
-  const handleClear =
-    async () => {
-
-      if (
-        !window.confirm(
-          'Ban co chac muon xoa toan bo danh sach yeu thich?'
-        )
-      ) {
-        return;
-      }
-
-      try {
-
-        setError('');
-        setMessage('');
-
-        await clearWishlist();
-
-        await loadWishlist();
-
-        setMessage(
-          'Da xoa toan bo danh sach yeu thich.'
-        );
-
-      } catch (err) {
-
-        console.error(err);
-
-        setError(
-          'Xoa danh sach yeu thich that bai.'
-        );
-      }
-    };
-
-  if (loading) {
-
+  if (loading && !wishlist) {
+    return <div className="ct-page"><div className="ct-state">Đang tải...</div></div>;
+  }
+  if (error) {
     return (
-      <div style={{ padding: 24 }}>
-        Dang tai danh sach yeu thich...
+      <div className="ct-page">
+        <div className="ct-state ct-error">
+          <p>{error}</p>
+          <button className="ct-btn" onClick={load}>Thử lại</button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        padding: 24,
-        maxWidth: 900,
-        margin: '0 auto'
-      }}
-    >
-
-      <h1>
-        Danh sach yeu thich
-      </h1>
-
-      <div
-        style={{
-          border: '1px solid #ddd',
-          padding: 16,
-          marginBottom: 24,
-          borderRadius: 8
-        }}
-      >
-
-        <h2>Them san pham</h2>
-
-        <div
-          style={{
-            display: 'flex',
-            gap: 12,
-            flexWrap: 'wrap'
-          }}
-        >
-
-          <input
-            type="number"
-            min="1"
-            placeholder="Product ID"
-            value={productId}
-            onChange={(event) =>
-              setProductId(event.target.value)
-            }
-          />
-
-          <button
-            onClick={handleAddItem}
-          >
-            Them vao yeu thich
-          </button>
-
+    <div className="ct-page">
+      <h1>Sản phẩm yêu thích</h1>
+      {message && <p className={message.type === 'error' ? 'ct-error' : ''}>{message.text}</p>}
+      {!wishlist || wishlist.items.length === 0 ? (
+        <div className="ct-state">
+          <p>Chưa có sản phẩm yêu thích.</p>
+          <Link to="/products">Khám phá sản phẩm</Link>
         </div>
-
-      </div>
-
-      {message && (
-        <p
-          style={{
-            color: 'green'
-          }}
-        >
-          {message}
-        </p>
-      )}
-
-      {error && (
-        <p
-          style={{
-            color: 'red'
-          }}
-        >
-          {error}
-        </p>
-      )}
-
-      {!wishlist ||
-      wishlist.items.length === 0 ? (
-
-        <p>
-          Danh sach yeu thich dang trong.
-        </p>
-
       ) : (
-
-        <div>
-
+        wishlist.items.map((item) => (
           <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 16
-            }}
+            key={item.id}
+            className={`ct-row ${item.available ? '' : 'ct-unavailable'}`}
+            style={{ gridTemplateColumns: '72px 1fr auto auto' }}
           >
-
-            <h2>
-              San pham yeu thich (
-              {wishlist.items.length})
-            </h2>
-
+            <ItemThumb imageUrl={item.imageUrl} alt={item.productName} />
+            <div>
+              <Link className="ct-name" to={`/products/${item.productId}`}>{item.productName}</Link>
+              <div className="ct-price">{item.price != null ? formatPrice(item.price) : ''}</div>
+            </div>
             <button
-              onClick={handleClear}
+              className="ct-btn"
+              disabled={!item.available || !item.stock}
+              onClick={() => moveToCart(item)}
             >
-              Xoa tat ca
+              {item.available && !item.stock ? 'Hết hàng' : 'Thêm vào giỏ'}
             </button>
-
+            <button className="ct-btn ct-btn-danger" onClick={() => remove(item)}>Bỏ thích</button>
           </div>
-
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 12
-            }}
-          >
-
-            {wishlist.items.map((item) => (
-
-              <div
-                key={item.id}
-                style={{
-                  border: '1px solid #ddd',
-                  borderRadius: 8,
-                  padding: 16,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}
-              >
-
-                <div>
-
-                  <strong>
-                    Product ID: {item.productId}
-                  </strong>
-
-                </div>
-
-                <button
-                  onClick={() =>
-                    handleRemove(item.id)
-                  }
-                >
-                  Xoa
-                </button>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        </div>
+        ))
       )}
-
     </div>
   );
 }
