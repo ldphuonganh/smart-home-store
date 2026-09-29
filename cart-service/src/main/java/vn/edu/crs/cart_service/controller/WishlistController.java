@@ -1,94 +1,41 @@
 package vn.edu.crs.cart_service.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.crs.cart_service.dto.WishlistDTO;
+import vn.edu.crs.cart_service.dto.WishlistItemRequest;
 import vn.edu.crs.cart_service.service.WishlistService;
 
+/** Qua Gateway: /api/wishlist/** -> cart-service /wishlist/** */
 @RestController
-@RequestMapping("/api/wishlist")
+@RequestMapping("/wishlist")
 @RequiredArgsConstructor
 public class WishlistController {
 
     private final WishlistService wishlistService;
 
     @GetMapping
-    public ResponseEntity<WishlistDTO> getWishlist(
-            Authentication authentication
-    ) {
-
-        Long userId =
-                getUserId(authentication);
-
-        return ResponseEntity.ok(
-                wishlistService.getWishlist(userId)
-        );
+    public WishlistDTO getWishlist(Authentication authentication) {
+        return wishlistService.getWishlist(CurrentUser.id(authentication));
     }
 
     @PostMapping("/items")
-    public ResponseEntity<WishlistDTO> addItem(
-            @RequestParam Long productId,
-            Authentication authentication
-    ) {
-
-        Long userId =
-                getUserId(authentication);
-
-        return ResponseEntity.ok(
-                wishlistService.addItem(
-                        userId,
-                        productId
-                )
-        );
+    @ResponseStatus(HttpStatus.CREATED)
+    public WishlistDTO addItem(@Valid @RequestBody WishlistItemRequest request, Authentication authentication) {
+        return wishlistService.addItem(CurrentUser.id(authentication), request.getProductId());
     }
 
     @DeleteMapping("/items/{id}")
-    public ResponseEntity<Void> removeItem(
-            @PathVariable Long id,
-            Authentication authentication
-    ) {
-
-        Long userId =
-                getUserId(authentication);
-
-        wishlistService.removeItem(
-                userId,
-                id
-        );
-
-        return ResponseEntity.noContent().build();
+    public WishlistDTO removeItem(@PathVariable Long id, Authentication authentication) {
+        return wishlistService.removeItem(CurrentUser.id(authentication), id);
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> clearWishlist(
-            Authentication authentication
-    ) {
-
-        Long userId =
-                getUserId(authentication);
-
-        wishlistService.clearWishlist(
-                userId
-        );
-
-        return ResponseEntity.noContent().build();
-    }
-
-    private Long getUserId(
-            Authentication authentication
-    ) {
-
-        Object credentials =
-                authentication.getCredentials();
-
-        if (credentials instanceof Number number) {
-            return number.longValue();
-        }
-
-        throw new IllegalStateException(
-                "Khong lay duoc userId tu JWT"
-        );
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void clearWishlist(Authentication authentication) {
+        wishlistService.clearWishlist(CurrentUser.id(authentication));
     }
 }
