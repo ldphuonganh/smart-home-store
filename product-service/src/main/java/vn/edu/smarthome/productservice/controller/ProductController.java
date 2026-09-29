@@ -2,146 +2,87 @@ package vn.edu.smarthome.productservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.edu.smarthome.productservice.dto.ProductDTO;
-import vn.edu.smarthome.productservice.service.ProductService;
-import vn.edu.smarthome.productservice.service.FileStorageService;
 import org.springframework.web.multipart.MultipartFile;
+import vn.edu.smarthome.productservice.dto.PageResponse;
+import vn.edu.smarthome.productservice.dto.ProductRequest;
+import vn.edu.smarthome.productservice.dto.ProductResponse;
+import vn.edu.smarthome.productservice.service.FileStorageService;
+import vn.edu.smarthome.productservice.service.ProductService;
 
+import java.math.BigDecimal;
+import java.util.concurrent.TimeUnit;
 
-import java.util.List;
-
+/**
+ * API sản phẩm cho Client (qua Gateway: /api/products/**).
+ * GET: public. POST/PUT/DELETE: chỉ ADMIN (cấu hình trong SecurityConfig).
+ * Controller chỉ nhận request và gọi Service; lỗi do GlobalExceptionHandler xử lý.
+ */
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
-    private final FileStorageService fileStorageService;   // ← thêm dòng này
-
-    // ==================== GET: Lấy danh sách + Tìm kiếm + Phân trang ====================
+    private final FileStorageService fileStorageService;
 
     /**
-     * GET /products?keyword=...&page=0&size=10&sort=price,desc
-     * Public - ai cũng xem được
+     * GET /products?keyword=&categoryId=&minPrice=&maxPrice=&inStock=&page=0&size=12&sort=price,asc
      */
     @GetMapping
-    public ResponseEntity<Page<ProductDTO>> getProducts(
+    public PageResponse<ProductResponse> search(
             @RequestParam(required = false) String keyword,
-            Pageable pageable) {
-        return ResponseEntity.ok(productService.searchProducts(keyword, pageable));
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Boolean inStock,
+            @PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return productService.search(keyword, categoryId, minPrice, maxPrice, inStock, pageable);
     }
 
-    /**
-     * GET /products/{id}
-     * Public - ai cũng xem được
-     */
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
-        return productService.getProductById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    public ProductResponse getById(@PathVariable Long id) {
+        return productService.getById(id);
     }
 
-    // ==================== POST: Tạo sản phẩm - chỉ ADMIN ====================
-
-    /**
-     * POST /products?role=ADMIN
-     * Body: { "name": "...", "price": ..., "categoryId": ... }
-     */
     @PostMapping
-    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductDTO dto) {
-        try {
-            ProductDTO created = productService.createProduct(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProductResponse create(@Valid @RequestBody ProductRequest request) {
+        return productService.create(request);
     }
 
-    // ==================== PUT: Cập nhật sản phẩm - chỉ ADMIN ====================
-
-    /**
-     * PUT /products/{id}?role=ADMIN
-     */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateProduct(
-            @PathVariable Long id,
-            @Valid @RequestBody ProductDTO dto) {
-        try {
-            return productService.updateProduct(id, dto)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
+        return productService.update(id, request);
     }
 
-    // ==================== DELETE: Xóa sản phẩm - chỉ ADMIN ====================
-
-    /**
-     * DELETE /products/{id}?role=ADMIN
-     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
-        boolean deleted = productService.deleteProduct(id);
-        return deleted
-                ? ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-                : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        productService.delete(id);
     }
 
-    // ==================== ENDPOINTS THEO CATEGORY ====================
-
-    /**
-     * GET /products/category/{categoryId}
-     * Public - lấy tất cả sản phẩm của 1 danh mục
-     */
-    @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<ProductDTO>> getByCategory(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(productService.getProductsByCategory(categoryId));
+    /** POST /products/{id}/image (multipart/form-data, field "file") - ADMIN. */
+    @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ProductResponse uploadImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        return productService.updateImage(id, file);
     }
 
-    /**
-     * POST /products/category/{categoryId}?role=ADMIN
-     * Tạo sản phẩm trực tiếp trong 1 category
-     */
-    @PostMapping("/category/{categoryId}")
-    public ResponseEntity<?> createInCategory(
-            @PathVariable Long categoryId,
-            @Valid @RequestBody ProductDTO dto) {
-        try {
-            return productService.createProductInCategory(categoryId, dto)
-                    .map(p -> ResponseEntity.status(HttpStatus.CREATED).body(p))
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
-
-    // ==================== UPLOAD ẢNH ====================
-
-    /**
-     * POST /products/{id}/upload-image?role=ADMIN
-     * Form-data: file=<ảnh>
-     */
-    @PostMapping("/{id}/upload-image")
-    public ResponseEntity<?> uploadProductImage(
-            @PathVariable Long id,
-            @RequestParam("file") MultipartFile file) {
-        try {
-            String imageUrl = fileStorageService.saveFile(file);
-            return productService.updateProductImage(id, imageUrl)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Lỗi lưu file: " + e.getMessage());
-        }
+    /** GET /products/images/{fileName} - public, trả về file ảnh đã upload. */
+    @GetMapping("/images/{fileName:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String fileName) {
+        Resource image = fileStorageService.loadImage(fileName);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(fileStorageService.probeContentType(fileName)))
+                .cacheControl(CacheControl.maxAge(7, TimeUnit.DAYS))
+                .body(image);
     }
 }

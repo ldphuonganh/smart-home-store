@@ -2,58 +2,88 @@ package vn.edu.smarthome.productservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.smarthome.productservice.dto.CategoryDTO;
+import org.springframework.transaction.annotation.Transactional;
+import vn.edu.smarthome.productservice.dto.CategoryRequest;
+import vn.edu.smarthome.productservice.dto.CategoryResponse;
 import vn.edu.smarthome.productservice.entity.Category;
+import vn.edu.smarthome.productservice.exception.ConflictException;
+import vn.edu.smarthome.productservice.exception.ResourceNotFoundException;
 import vn.edu.smarthome.productservice.repository.CategoryRepository;
+import vn.edu.smarthome.productservice.repository.ProductRepository;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
-    public List<CategoryDTO> getAllCategories() {
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getAll() {
         return categoryRepository.findAll().stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+                .map(this::toResponse)
+                .toList();
     }
 
-    public Optional<CategoryDTO> getCategoryById(Long id) {
-        return categoryRepository.findById(id).map(this::toDTO);
+    @Transactional(readOnly = true)
+    public CategoryResponse getById(Long id) {
+        return toResponse(findEntity(id));
     }
 
-    public CategoryDTO createCategory(CategoryDTO dto) {
-        if (categoryRepository.existsByNameIgnoreCase(dto.getName())) {
-            throw new IllegalArgumentException("Tên danh mục đã tồn tại");
+    @Transactional
+    public CategoryResponse create(CategoryRequest request) {
+        String name = request.getName().trim();
+        if (categoryRepository.existsByNameIgnoreCase(name)) {
+            throw new ConflictException("Tên danh mục đã tồn tại");
         }
         Category category = new Category();
-        category.setName(dto.getName());
-        return toDTO(categoryRepository.save(category));
+        category.setName(name);
+        category.setDescription(request.getDescription());
+        return toResponse(categoryRepository.save(category));
     }
 
-    public Optional<CategoryDTO> updateCategory(Long id, CategoryDTO dto) {
-        return categoryRepository.findById(id).map(category -> {
-            category.setName(dto.getName());
-            return toDTO(categoryRepository.save(category));
-        });
-    }
-
-    public boolean deleteCategory(Long id) {
-        if (categoryRepository.existsById(id)) {
-            categoryRepository.deleteById(id);
-            return true;
+    @Transactional
+    public CategoryResponse update(Long id, CategoryRequest request) {
+        Category category = findEntity(id);
+        String name = request.getName().trim();
+        if (categoryRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
+            throw new ConflictException("Tên danh mục đã tồn tại");
         }
-        return false;
+        category.setName(name);
+        category.setDescription(request.getDescription());
+        return toResponse(categoryRepository.save(category));
     }
 
-    private CategoryDTO toDTO(Category category) {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setId(category.getId());
-        dto.setName(category.getName());
-        return dto;
+    /**
+     * Không cho xoá danh mục còn sản phẩm (trước đây cascade xoá luôn sản phẩm - rất nguy hiểm).
+     * Admin phải chuyển sản phẩm sang danh mục khác hoặc xoá sản phẩm trước.
+     */
+    @Transactional
+    public void delete(Long id) {
+        Category category = findEntity(id);
+        long productCount = productRepository.countByCategoryId(id);
+        if (productCount > 0) {
+            throw new ConflictException("Danh mục đang có " + productCount
+                    + " sản phẩm, không thể xoá");
+        }
+        categoryRepository.delete(category);
+    }
+
+    /** Dùng chung cho ProductService. */
+    @Transactional(readOnly = true)
+    public Category findEntity(Long id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục id = " + id));
+    }
+
+    private CategoryResponse toResponse(Category category) {
+        return CategoryResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .description(category.getDescription())
+                .productCount(productRepository.countByCategoryId(category.getId()))
+                .build();
     }
 }
