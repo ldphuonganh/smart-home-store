@@ -40,6 +40,14 @@ public class Order {
     @Column(name = "total_amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal totalAmount;
 
+    /**
+     * Trạng thái thanh toán. Để nullable để bảng orders cũ (đã có dữ liệu)
+     * vẫn tự thêm cột được; getter trả UNPAID khi null.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", length = 20)
+    private PaymentStatus paymentStatus;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -68,6 +76,13 @@ public class Order {
         if (status == null) {
             status = OrderStatus.PENDING;
         }
+        if (paymentStatus == null) {
+            paymentStatus = PaymentStatus.UNPAID;
+        }
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus != null ? paymentStatus : PaymentStatus.UNPAID;
     }
 
     @PreUpdate
