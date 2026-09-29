@@ -3,164 +3,90 @@ package vn.edu.crs.cart_service.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.edu.crs.cart_service.client.ProductClient;
 import vn.edu.crs.cart_service.dto.WishlistDTO;
 import vn.edu.crs.cart_service.dto.WishlistItemDTO;
 import vn.edu.crs.cart_service.entity.Wishlist;
 import vn.edu.crs.cart_service.entity.WishlistItem;
-import vn.edu.crs.cart_service.repository.WishlistItemRepository;
 import vn.edu.crs.cart_service.repository.WishlistRepository;
 
-import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class WishlistService {
 
     private final WishlistRepository wishlistRepository;
-    private final WishlistItemRepository wishlistItemRepository;
+    private final ProductClient productClient;
 
     @Transactional
     public WishlistDTO getWishlist(Long userId) {
-
-        Wishlist wishlist =
-                wishlistRepository
-                        .findByUserId(userId)
-                        .orElseGet(() ->
-                                createWishlist(userId)
-                        );
-
-        return toDTO(wishlist);
+        return toDTO(getOrCreate(userId));
     }
 
+    /** Thêm sản phẩm yêu thích; đã có thì bỏ qua (không báo lỗi). */
     @Transactional
-    public WishlistDTO addItem(
-            Long userId,
-            Long productId
-    ) {
-
-        if (productId == null || productId <= 0) {
-            throw new IllegalArgumentException(
-                    "Product ID phai lon hon 0"
-            );
-        }
-
-        Wishlist wishlist =
-                wishlistRepository
-                        .findByUserId(userId)
-                        .orElseGet(() ->
-                                createWishlist(userId)
-                        );
-
-        WishlistItem item =
-                wishlistItemRepository
-                        .findByWishlistIdAndProductId(
-                                wishlist.getId(),
-                                productId
-                        )
-                        .orElse(null);
-
-        if (item == null) {
-
-            item = new WishlistItem();
-
+    public WishlistDTO addItem(Long userId, Long productId) {
+        productClient.getRequired(productId); // sản phẩm phải tồn tại
+        Wishlist wishlist = getOrCreate(userId);
+        boolean exists = wishlist.getItems().stream().anyMatch(i -> i.getProductId().equals(productId));
+        if (!exists) {
+            WishlistItem item = new WishlistItem();
             item.setWishlist(wishlist);
             item.setProductId(productId);
-
             wishlist.getItems().add(item);
-
-            wishlistItemRepository.save(item);
+            wishlist.setUpdatedAt(java.time.LocalDateTime.now());
         }
-
-        return toDTO(wishlist);
+        return toDTO(wishlistRepository.saveAndFlush(wishlist));
     }
 
     @Transactional
-    public void removeItem(
-            Long userId,
-            Long itemId
-    ) {
-
-        Wishlist wishlist =
-                wishlistRepository
-                        .findByUserId(userId)
-                        .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "Khong tim thay wishlist"
-                                )
-                        );
-
-        WishlistItem item =
-                wishlistItemRepository
-                        .findByIdAndWishlistId(
-                                itemId,
-                                wishlist.getId()
-                        )
-                        .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "Khong tim thay san pham trong wishlist"
-                                )
-                        );
-
+    public WishlistDTO removeItem(Long userId, Long itemId) {
+        Wishlist wishlist = wishlistRepository.findByUserId(userId)
+                .orElseThrow(() -> new NoSuchElementException("Danh sach yeu thich trong"));
+        WishlistItem item = wishlist.getItems().stream()
+                .filter(i -> i.getId().equals(itemId))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("Khong tim thay san pham trong danh sach yeu thich"));
         wishlist.getItems().remove(item);
-
-        wishlistItemRepository.delete(item);
+        wishlist.setUpdatedAt(java.time.LocalDateTime.now());
+        return toDTO(wishlistRepository.save(wishlist));
     }
 
     @Transactional
     public void clearWishlist(Long userId) {
-
-        Wishlist wishlist =
-                wishlistRepository
-                        .findByUserId(userId)
-                        .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "Khong tim thay wishlist"
-                                )
-                        );
-
-        wishlist.getItems().clear();
-
-        wishlistRepository.save(wishlist);
+        wishlistRepository.findByUserId(userId).ifPresent(w -> {
+            w.getItems().clear();
+            wishlistRepository.save(w);
+        });
     }
 
-    private Wishlist createWishlist(
-            Long userId
-    ) {
-
-        Wishlist wishlist =
-                new Wishlist();
-
-        wishlist.setUserId(userId);
-
-        return wishlistRepository.save(wishlist);
+    private Wishlist getOrCreate(Long userId) {
+        return wishlistRepository.findByUserId(userId).orElseGet(() -> {
+            Wishlist wishlist = new Wishlist();
+            wishlist.setUserId(userId);
+            return wishlistRepository.save(wishlist);
+        });
     }
 
-    private WishlistDTO toDTO(
-            Wishlist wishlist
-    ) {
-
-        List<WishlistItemDTO> items =
-                wishlist.getItems()
-                        .stream()
-                        .map(this::toItemDTO)
-                        .toList();
-
+    private WishlistDTO toDTO(Wishlist wishlist) {
         return new WishlistDTO(
                 wishlist.getId(),
                 wishlist.getUserId(),
-                items,
+                wishlist.getItems().stream().map(this::toItemDTO).toList(),
                 wishlist.getCreatedAt(),
-                wishlist.getUpdatedAt()
-        );
+                wishlist.getUpdatedAt());
     }
 
-    private WishlistItemDTO toItemDTO(
-            WishlistItem item
-    ) {
-
-        return new WishlistItemDTO(
-                item.getId(),
-                item.getProductId()
-        );
+    private WishlistItemDTO toItemDTO(WishlistItem item) {
+        Optional<ProductClient.ProductInfo> product = productClient.find(item.getProductId());
+        WishlistItemDTO.WishlistItemDTOBuilder dto = WishlistItemDTO.builder()
+                .id(item.getId())
+                .productId(item.getProductId());
+        return product.map(p -> dto.productName(p.getName()).price(p.getPrice())
+                        .imageUrl(p.getImageUrl()).stock(p.getStock()).available(true).build())
+                .orElseGet(() -> dto.productName("Sản phẩm #" + item.getProductId() + " (không còn bán)")
+                        .available(false).build());
     }
 }
