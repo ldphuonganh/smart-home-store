@@ -122,6 +122,22 @@ export default function OrderSuccessPage() {
         }}
       >
 
+        {/* TV5 - Payment: đơn chuyển khoản -> sang trang quét QR */}
+        {order && order.paymentMethod === 'BANK_TRANSFER' && (
+          <Link
+            to={`/payment/${order.id}`}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 6,
+              background: '#198754',
+              color: 'white',
+              textDecoration: 'none'
+            }}
+          >
+            Thanh toán ngay
+          </Link>
+        )}
+
         {order && (
           <Link
             to={`/orders/${order.id}`}

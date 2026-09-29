@@ -40,9 +40,15 @@ export default function Navbar() {
       {/* MENU ADMIN */}
       {isAuthenticated &&
         user?.role === 'ADMIN' && (
-          <Link to="/admin/orders">
-            Quản lý đơn hàng
-          </Link>
+          <>
+            <Link to="/admin/orders">
+              Quản lý đơn hàng
+            </Link>
+
+            <Link to="/admin/payments">
+              Quản lý thanh toán
+            </Link>
+          </>
         )}
 
       {/* MENU CUSTOMER */}
