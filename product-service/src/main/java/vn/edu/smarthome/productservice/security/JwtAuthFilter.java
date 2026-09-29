@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,48 +20,50 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * Tự verify chữ ký JWT bằng secret dùng chung với auth-service.
+ * Token hợp lệ -> đặt Authentication với quyền ROLE_{role}.
+ * Token sai/hết hạn -> không đặt gì, Spring Security sẽ trả 401 cho API cần đăng nhập.
+ */
+@Slf4j
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    @Value("${jwt.secret}")
-    private String secret;
+    private final SecretKey key;
+
+    public JwtAuthFilter(@Value("${jwt.secret}") String secret) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
-
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
             try {
-                SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-
                 Claims claims = Jwts.parser()
                         .verifyWith(key)
                         .build()
-                        .parseSignedClaims(token)
+                        .parseSignedClaims(header.substring(7))
                         .getPayload();
 
-                String username = claims.getSubject();
                 String role = claims.get("role", String.class);
-
-                // Set Authentication vào SecurityContext
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        username,
-                        null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-
+                if (role != null) {
+                    if (role.startsWith("ROLE_")) {
+                        role = role.substring(5);
+                    }
+                    // Principal: ưu tiên email (theo thống nhất mới), nếu chưa có thì dùng subject
+                    Object email = claims.get("email");
+                    String principal = email != null ? email.toString() : claims.getSubject();
+                    var authentication = new UsernamePasswordAuthenticationToken(
+                            principal, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             } catch (Exception e) {
-                // Token không hợp lệ → xóa context, để Spring Security trả 401
+                log.debug("JWT không hợp lệ: {}", e.getMessage());
                 SecurityContextHolder.clearContext();
             }
         }
-
         filterChain.doFilter(request, response);
     }
 }
