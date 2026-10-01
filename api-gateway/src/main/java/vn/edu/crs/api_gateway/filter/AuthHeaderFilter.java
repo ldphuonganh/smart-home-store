@@ -3,6 +3,7 @@ package vn.edu.crs.api_gateway.filter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -11,42 +12,50 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+/**
+ * Chặn sớm request thiếu header Authorization cho các API cần đăng nhập.
+ * (Mỗi service vẫn TỰ verify chữ ký JWT - Gateway chỉ lọc sớm cho nhẹ tải.)
+ */
 @Component
 public class AuthHeaderFilter implements GlobalFilter, Ordered {
 
-    // Các đường dẫn KHÔNG cần Header Authorization
+    /** Không cần đăng nhập (mọi method). */
     private static final List<String> OPEN_PATHS = List.of(
             "/api/auth/login",
-            "/api/public/courses"
+            "/api/auth/register",
+            "/api/public/"          // Partner: dùng X-API-KEY, ApiKeyFilter kiểm tra
+    );
+
+    /** Chỉ cần đăng nhập khi KHÔNG phải GET (khách vẫn xem sản phẩm, danh mục, ảnh). */
+    private static final List<String> PUBLIC_READ_PATHS = List.of(
+            "/api/products",
+            "/api/categories"
     );
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
+        HttpMethod method = request.getMethod();
 
-        // Kiểm tra nếu là đường dẫn public
+        boolean isPreflight = HttpMethod.OPTIONS.equals(method);
         boolean isOpen = OPEN_PATHS.stream().anyMatch(path::startsWith);
+        boolean isPublicRead = HttpMethod.GET.equals(method)
+                && PUBLIC_READ_PATHS.stream().anyMatch(path::startsWith);
 
-        // GET /api/courses/** là public (xem môn học không cần đăng nhập)
-        boolean isPublicCourseRead = path.startsWith("/api/courses")
-                && request.getMethod().name().equals("GET");
-
-        if (isOpen || isPublicCourseRead) {
+        if (isPreflight || isOpen || isPublicRead) {
             return chain.filter(exchange);
         }
 
-        // Kiểm tra Header Authorization
-        if (!request.getHeaders().containsKey("Authorization")) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+        String auth = request.getHeaders().getFirst("Authorization");
+        if (auth == null || !auth.startsWith("Bearer ")) {
+            return GatewayErrors.write(exchange, HttpStatus.UNAUTHORIZED, "Ban chua dang nhap");
         }
-
         return chain.filter(exchange);
     }
 
     @Override
     public int getOrder() {
-        return -1; // Chạy sớm, trước khi request được định tuyến
+        return -1;
     }
 }
