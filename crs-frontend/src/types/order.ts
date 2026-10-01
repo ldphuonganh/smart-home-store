@@ -5,6 +5,8 @@ export type OrderStatus =
   | 'COMPLETED'
   | 'CANCELLED';
 
+export type PaymentStatus = 'UNPAID' | 'PAID';
+
 export interface OrderItemRequest {
   productId: number;
   quantity: number;
@@ -38,6 +40,7 @@ export interface Order {
   phone: string;
   paymentMethod: string;
   status: OrderStatus;
+  paymentStatus: PaymentStatus;
   totalAmount: number;
   createdAt: string;
   updatedAt: string;
