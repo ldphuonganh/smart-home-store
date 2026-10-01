@@ -37,12 +37,26 @@ export default function Navbar() {
         Trang chủ
       </Link>
 
+      <Link to="/products">
+        Sản phẩm
+      </Link>
+
       {/* MENU ADMIN */}
       {isAuthenticated &&
         user?.role === 'ADMIN' && (
-          <Link to="/admin/orders">
-            Quản lý đơn hàng
-          </Link>
+          <>
+            <Link to="/admin/products">
+              Quản lý sản phẩm
+            </Link>
+
+            <Link to="/admin/categories">
+              Quản lý danh mục
+            </Link>
+
+            <Link to="/admin/orders">
+              Quản lý đơn hàng
+            </Link>
+          </>
         )}
 
       {/* MENU CUSTOMER */}
