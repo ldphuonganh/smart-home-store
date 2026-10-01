@@ -102,6 +102,16 @@ export default function OrderSuccessPage() {
 
           <p>
             <strong>
+              Thanh toán:
+            </strong>
+            {' '}
+            {order.paymentStatus === 'PAID'
+              ? 'Đã thanh toán'
+              : 'Chưa thanh toán'}
+          </p>
+
+          <p>
+            <strong>
               Tổng tiền:
             </strong>
             {' '}
@@ -121,6 +131,24 @@ export default function OrderSuccessPage() {
           justifyContent: 'center'
         }}
       >
+
+        {/* Chuyển khoản: sang trang thanh toán của payment-service (TV5) */}
+        {order &&
+          order.paymentMethod === 'BANK_TRANSFER' &&
+          order.paymentStatus !== 'PAID' && (
+          <Link
+            to={`/payment/${order.id}`}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 6,
+              background: '#15803d',
+              color: 'white',
+              textDecoration: 'none'
+            }}
+          >
+            Thanh toán ngay
+          </Link>
+        )}
 
         {order && (
           <Link
