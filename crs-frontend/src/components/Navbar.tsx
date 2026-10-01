@@ -56,6 +56,10 @@ export default function Navbar() {
             <Link to="/admin/orders">
               Quản lý đơn hàng
             </Link>
+
+            <Link to="/admin/payments">
+              Quản lý thanh toán
+            </Link>
           </>
         )}
 

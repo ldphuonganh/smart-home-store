@@ -26,6 +26,10 @@ import AdminCategoriesPage from './pages/products/AdminCategoriesPage';
 import CartPage from './pages/CartPage';
 import WishlistPage from './pages/WishlistPage';
 
+// TV5 - Payment
+import PaymentPage from './pages/PaymentPage';
+import AdminPaymentsPage from './pages/AdminPaymentsPage';
+
 function App() {
   return (
     <>
@@ -159,6 +163,30 @@ function App() {
           element={
             <ProtectedRoute requiredRole="ADMIN">
               <AdminOrdersPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* =========================
+            TV5 - PAYMENT
+           ========================= */}
+
+        {/* Thanh toán cho 1 đơn hàng (chuyển khoản / COD) */}
+        <Route
+          path="/payment/:orderId"
+          element={
+            <ProtectedRoute requiredRole="CUSTOMER">
+              <PaymentPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin xem giao dịch thanh toán */}
+        <Route
+          path="/admin/payments"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminPaymentsPage />
             </ProtectedRoute>
           }
         />
