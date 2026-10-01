@@ -16,18 +16,24 @@ import MyOrdersPage from './pages/MyOrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
 
+// TV2 - Product + Category
+import ProductListPage from './pages/products/ProductListPage';
+import ProductDetailPage from './pages/products/ProductDetailPage';
+import AdminProductsPage from './pages/products/AdminProductsPage';
+import AdminCategoriesPage from './pages/products/AdminCategoriesPage';
+
 function App() {
   return (
     <>
       <Navbar />
 
       <Routes>
-        {/* Trang mặc định */}
+        {/* Trang mặc định: danh sách sản phẩm (ai cũng xem được) */}
         <Route
           path="/"
           element={
             <Navigate
-              to="/login"
+              to="/products"
               replace
             />
           }
@@ -38,6 +44,42 @@ function App() {
           path="/login"
           element={
             <LoginPage />
+          }
+        />
+
+        {/* =========================
+            TV2 - PRODUCT + CATEGORY
+           ========================= */}
+
+        {/* Danh sách + tìm kiếm/lọc sản phẩm (public) */}
+        <Route
+          path="/products"
+          element={<ProductListPage />}
+        />
+
+        {/* Chi tiết sản phẩm (public) */}
+        <Route
+          path="/products/:id"
+          element={<ProductDetailPage />}
+        />
+
+        {/* Admin quản lý sản phẩm */}
+        <Route
+          path="/admin/products"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminProductsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin quản lý danh mục */}
+        <Route
+          path="/admin/categories"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminCategoriesPage />
+            </ProtectedRoute>
           }
         />
 
@@ -100,7 +142,7 @@ function App() {
           path="*"
           element={
             <Navigate
-              to="/login"
+              to="/products"
               replace
             />
           }

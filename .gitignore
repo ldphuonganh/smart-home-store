@@ -17,6 +17,8 @@
 # Temporary files
 *.log
 *.tmp
+# Uploads
+**/uploads/
 
 # Old Git history from teacher repository
 .git-old-teacher/
