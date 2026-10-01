@@ -22,6 +22,10 @@ import ProductDetailPage from './pages/products/ProductDetailPage';
 import AdminProductsPage from './pages/products/AdminProductsPage';
 import AdminCategoriesPage from './pages/products/AdminCategoriesPage';
 
+// TV3 - Cart + Wishlist
+import CartPage from './pages/CartPage';
+import WishlistPage from './pages/WishlistPage';
+
 function App() {
   return (
     <>
@@ -79,6 +83,28 @@ function App() {
           element={
             <ProtectedRoute requiredRole="ADMIN">
               <AdminCategoriesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* =========================
+            TV3 - CART + WISHLIST
+           ========================= */}
+
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute requiredRole="CUSTOMER">
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute requiredRole="CUSTOMER">
+              <WishlistPage />
             </ProtectedRoute>
           }
         />

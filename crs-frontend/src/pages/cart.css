@@ -1,0 +1,30 @@
+/* Style trang Giỏ hàng / Yêu thích (TV3) */
+.ct-page { text-align: left; padding: 24px; color: var(--text-h); }
+.ct-page h1 { font-size: 30px; margin: 0 0 16px; letter-spacing: normal; }
+.ct-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; align-items: start; }
+@media (max-width: 800px) { .ct-layout { grid-template-columns: 1fr; } }
+.ct-row {
+  display: grid; grid-template-columns: 72px 1fr auto auto auto; gap: 12px; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+@media (max-width: 600px) { .ct-row { grid-template-columns: 56px 1fr; } }
+.ct-thumb {
+  width: 72px; height: 72px; border-radius: 8px; object-fit: cover; background: var(--code-bg);
+  display: flex; align-items: center; justify-content: center; font-size: 28px;
+}
+.ct-name { font-weight: 600; }
+.ct-muted { color: var(--text); font-size: 14px; }
+.ct-price { color: #c2410c; font-weight: 700; }
+.ct-qty { display: flex; align-items: center; gap: 4px; }
+.ct-qty input { width: 48px; text-align: center; }
+.ct-btn {
+  font: inherit; font-size: 15px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-h); cursor: pointer;
+}
+.ct-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.ct-btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; width: 100%; padding: 10px; }
+.ct-btn-danger { color: #b91c1c; border-color: #fca5a5; }
+.ct-summary { border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.ct-state { padding: 40px 16px; text-align: center; border: 1px dashed var(--border); border-radius: 10px; }
+.ct-error { color: #b91c1c; }
+.ct-unavailable { opacity: 0.6; }
