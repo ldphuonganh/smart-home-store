@@ -22,14 +22,20 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    /** GET /categories?keyword= */
     @GetMapping
-    public List<CategoryResponse> getAll() {
-        return categoryService.getAll();
+    public List<CategoryResponse> getAll(@RequestParam(required = false) String keyword) {
+        return categoryService.getAll(keyword);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public CategoryResponse getById(@PathVariable Long id) {
         return categoryService.getById(id);
+    }
+
+    @GetMapping("/slug/{slug}")
+    public CategoryResponse getBySlug(@PathVariable String slug) {
+        return categoryService.getBySlug(slug);
     }
 
     @PostMapping
@@ -38,12 +44,12 @@ public class CategoryController {
         return categoryService.create(request);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id:\\d+}")
     public CategoryResponse update(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
         return categoryService.update(id, request);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         categoryService.delete(id);

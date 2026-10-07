@@ -31,11 +31,11 @@ public class PublicProductController {
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) Boolean inStock,
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
-        return productService.search(keyword, categoryId, minPrice, maxPrice, inStock, pageable);
+        return productService.searchPublic(keyword, categoryId, minPrice, maxPrice, inStock, pageable);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public ProductResponse getById(@PathVariable Long id) {
-        return productService.getById(id);
+        return productService.getVisibleById(id, false);
     }
 }
