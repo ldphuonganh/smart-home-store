@@ -52,9 +52,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     if (role.startsWith("ROLE_")) {
                         role = role.substring(5);
                     }
-                    // Principal: ưu tiên email (theo thống nhất mới), nếu chưa có thì dùng subject
                     Object email = claims.get("email");
-                    String principal = email != null ? email.toString() : claims.getSubject();
+                    Object name = claims.get("name");
+                    Object userId = claims.get("userId");
+                    AuthUser principal = new AuthUser(
+                            userId instanceof Number n ? n.longValue() : null,
+                            email != null ? email.toString() : claims.getSubject(),
+                            name != null ? name.toString() : null,
+                            role);
                     var authentication = new UsernamePasswordAuthenticationToken(
                             principal, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
                     SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -1,0 +1,451 @@
+{
+    "categories": [
+        {
+            "name": "Đồ nhà bếp",
+            "slug": "do-nha-bep",
+            "image": "kitchen.jpg"
+        },
+        {
+            "name": "Nội thất phòng khách",
+            "slug": "noi-that-phong-khach",
+            "image": "living-room.jpg"
+        },
+        {
+            "name": "Thiết bị thông minh",
+            "slug": "thiet-bi-thong-minh",
+            "image": "smart-device.jpg"
+        },
+        {
+            "name": "Đồ điện gia dụng",
+            "slug": "do-dien-gia-dung",
+            "image": "appliance.jpg"
+        },
+        {
+            "name": "Nội thất phòng ngủ",
+            "slug": "noi-that-phong-ngu",
+            "image": "bedroom.jpg"
+        },
+        {
+            "name": "Nội thất phòng tắm",
+            "slug": "noi-that-phong-tam",
+            "image": "bathroom.svg",
+            "description": "Gương soi, thiết bị nước nóng và những món làm phòng tắm tiện nghi hơn mỗi sáng."
+        }
+    ],
+    "products": [
+        {
+            "name": "Nồi cơm điện thông minh 1.8L",
+            "slug": "noi-com-dien-thong-minh-1-8l",
+            "brand": "Sharp",
+            "material": "Nhôm cao cấp",
+            "weight": "3.2kg",
+            "power": "700W",
+            "origin": "Nhật Bản",
+            "description": "Nồi cơm điện đa năng, nấu chín đều, giữ ấm tốt với công nghệ cảm ứng nhiệt thông minh",
+            "price": 2500000,
+            "stock": 20,
+            "images": [
+                "1786503858-noi-com-dien-thong-minh-18l.jpg",
+                "anhnoicom1.jpg.png",
+                "anhnoicom3.jpg.png"
+            ],
+            "category": "do-nha-bep"
+        },
+        {
+            "name": "Ấm siêu tốc 1.8L",
+            "slug": "am-sieu-toc-1-8l",
+            "brand": "Philips",
+            "material": "Thép không gỉ 304",
+            "weight": "1.1kg",
+            "power": "2200W",
+            "origin": "Hà Lan",
+            "description": "Đun sôi nhanh trong 5 phút, an toàn tự ngắt khi cạn nước, vỏ ngoài cách nhiệt",
+            "price": 450000,
+            "stock": 35,
+            "images": [
+                "1786503845-am-sieu-toc-18l.jpg"
+            ],
+            "category": "do-nha-bep"
+        },
+        {
+            "name": "Máy xay sinh tố đa năng",
+            "slug": "may-xay-sinh-to-da-nang",
+            "brand": "Sunhouse",
+            "material": "Nhựa ABS + Lưỡi dao thép",
+            "weight": "2.5kg",
+            "power": "800W",
+            "origin": "Việt Nam",
+            "description": "Máy xay sinh tố đa năng với 3 tốc độ, lưỡi dao 4 cánh, xay nhuyễn mọi loại thực phẩm",
+            "price": 890000,
+            "stock": 25,
+            "images": [
+                "1790178437-1-may-xay-sinh-to-da-nang.jpg"
+            ],
+            "category": "do-nha-bep"
+        },
+        {
+            "name": "Lò vi sóng thông minh 20L",
+            "slug": "lo-vi-song-thong-minh-20l",
+            "brand": "Panasonic",
+            "material": "Thép không gỉ",
+            "weight": "12kg",
+            "power": "800W",
+            "origin": "Nhật Bản",
+            "description": "Lò vi sóng đa năng với 10 chế độ nấu, cảm biến tự động điều chỉnh nhiệt độ",
+            "price": 3200000,
+            "stock": 10,
+            "images": [
+                "1790178458-1-lo-vi-song-thong-minh-20l.jpg"
+            ],
+            "category": "do-nha-bep"
+        },
+        {
+            "name": "Bộ sofa thông minh 3 chỗ",
+            "slug": "bo-sofa-thong-minh-3-cho",
+            "brand": "Hòa Phát",
+            "material": "Da cao cấp",
+            "weight": "45kg",
+            "origin": "Việt Nam",
+            "description": "Sofa tích hợp cổng sạc USB, ngả lưng điện, chất liệu da bền đẹp, dễ dàng vệ sinh",
+            "price": 12500000,
+            "stock": 10,
+            "images": [
+                "1786505479-bo-sofa-thong-minh-3-cho.jpg"
+            ],
+            "category": "noi-that-phong-khach"
+        },
+        {
+            "name": "Kệ tivi thông minh",
+            "slug": "ke-tivi-thong-minh",
+            "brand": "Kangaroo",
+            "material": "Gỗ công nghiệp cao cấp",
+            "weight": "30kg",
+            "origin": "Việt Nam",
+            "description": "Kệ tivi đa năng với nhiều ngăn chứa, thiết kế hiện đại, màu trắng sang trọng",
+            "price": 4200000,
+            "stock": 15,
+            "images": [
+                "1790178472-1-ke-tivi-thong-minh.jpg"
+            ],
+            "category": "noi-that-phong-khach"
+        },
+        {
+            "name": "Đèn trang trí thông minh LED",
+            "slug": "den-trang-tri-thong-minh-led",
+            "brand": "Xiaomi",
+            "material": "Nhôm + Nhựa cao cấp",
+            "weight": "0.8kg",
+            "power": "15W",
+            "origin": "Trung Quốc",
+            "description": "Đèn LED thông minh đổi màu 16 triệu màu, điều khiển qua điện thoại, hẹn giờ bật\/tắt",
+            "price": 650000,
+            "stock": 30,
+            "images": [
+                "1790178486-1-den-trang-tri-thong-minh-led.jpg"
+            ],
+            "category": "noi-that-phong-khach"
+        },
+        {
+            "name": "Máy lọc không khí",
+            "slug": "may-loc-khong-khi",
+            "brand": "Xiaomi",
+            "material": "Nhựa ABS",
+            "weight": "4.8kg",
+            "power": "50W",
+            "origin": "Trung Quốc",
+            "description": "Lọc bụi mịn PM2.5, khử khuẩn, diệt khuẩn 99.9%, phù hợp phòng 30-40m2",
+            "price": 5500000,
+            "stock": 15,
+            "images": [
+                "1786505489-may-loc-khong-khi.jpg"
+            ],
+            "category": "thiet-bi-thong-minh"
+        },
+        {
+            "name": "Robot hút bụi thông minh",
+            "slug": "robot-hut-bui-thong-minh",
+            "brand": "Ecovacs",
+            "material": "Nhựa ABS",
+            "weight": "3.5kg",
+            "power": "40W",
+            "origin": "Trung Quốc",
+            "description": "Robot hút bụi tự động, lau nhà thông minh, định vị bản đồ, tránh vật cản",
+            "price": 4200000,
+            "stock": 12,
+            "images": [
+                "1790178537-1-robot-hut-bui-thong-minh.jpg"
+            ],
+            "category": "thiet-bi-thong-minh"
+        },
+        {
+            "name": "Máy hút bụi thông minh",
+            "slug": "may-hut-bui-thong-minh",
+            "brand": "Dyson",
+            "material": "Nhựa cao cấp",
+            "weight": "2.5kg",
+            "power": "450W",
+            "origin": "Anh",
+            "description": "Hút bụi mạnh mẽ, pin lâu dài 60 phút, lọc HEPA, thiết kế nhẹ gọn",
+            "price": 8500000,
+            "stock": 12,
+            "images": [
+                "1786505498-may-hut-bui-thong-minh.jpg"
+            ],
+            "category": "do-dien-gia-dung"
+        },
+        {
+            "name": "Quạt điều hòa thông minh",
+            "slug": "quat-dieu-hoa-thong-minh",
+            "brand": "Daikin",
+            "material": "Nhựa ABS",
+            "weight": "6.5kg",
+            "power": "100W",
+            "origin": "Nhật Bản",
+            "description": "Quạt điều hòa kết hợp làm mát, sưởi ấm, lọc không khí, cảm biến nhiệt độ tự động",
+            "price": 3200000,
+            "stock": 8,
+            "images": [
+                "1790178685-1-quat-dieu-hoa-thong-minh.jpg"
+            ],
+            "category": "do-dien-gia-dung"
+        },
+        {
+            "name": "Tủ quần áo thông minh",
+            "slug": "tu-quan-ao-thong-minh",
+            "brand": "Kangaroo",
+            "material": "Gỗ công nghiệp",
+            "weight": "65kg",
+            "origin": "Việt Nam",
+            "description": "Tủ quần áo thông minh tích hợp đèn LED tự động, gương soi, nhiều ngăn chứa thông minh",
+            "price": 6800000,
+            "stock": 8,
+            "images": [
+                "1786505505-tu-quan-ao-thong-minh.jpg"
+            ],
+            "category": "noi-that-phong-ngu"
+        },
+        {
+            "name": "Giường ngủ thông minh",
+            "slug": "giuong-ngu-thong-minh",
+            "brand": "Hòa Phát",
+            "material": "Gỗ cao cấp",
+            "weight": "75kg",
+            "origin": "Việt Nam",
+            "description": "Giường ngủ thông minh tích hợp cổng sạc USB, đầu giường có đèn LED, ngăn chứa đồ",
+            "price": 9200000,
+            "stock": 6,
+            "images": [
+                "1790178608-1-giuong-ngu-thong-minh.jpg"
+            ],
+            "category": "noi-that-phong-ngu"
+        },
+        {
+            "category": "thiet-bi-thong-minh",
+            "name": "Camera an ninh trong nhà 2K",
+            "brand": "Xiaomi",
+            "material": "Nhựa ABS",
+            "weight": "0.3kg",
+            "power": "5W",
+            "origin": "Trung Quốc",
+            "price": 1290000,
+            "stock": 40,
+            "description": "Camera trong nhà độ phân giải 2K, xoay ngang 360° và nghiêng 108°, bao quát trọn căn phòng mà không cần lắp thêm mắt thứ hai.\n\n• Nhìn đêm hồng ngoại tới 10m, hình vẫn rõ khi tắt hết đèn.\n• Phát hiện chuyển động và tiếng động bất thường, đẩy thông báo về điện thoại trong vài giây.\n• Đàm thoại hai chiều, nói chuyện với người ở nhà ngay trên ứng dụng.\n• Lưu trữ thẻ nhớ tới 128GB hoặc đám mây, xem lại theo dòng thời gian.\n• Chế độ riêng tư tự che ống kính khi có người ở nhà.\n\nBảo hành chính hãng 24 tháng.",
+            "slug": "camera-an-ninh-trong-nha-2k",
+            "images": [
+                "1790178011-1-camera-an-ninh-trong-nha-2k.jpg"
+            ]
+        },
+        {
+            "category": "thiet-bi-thong-minh",
+            "name": "Khóa cửa vân tay thông minh",
+            "brand": "Philips",
+            "material": "Hợp kim kẽm",
+            "weight": "3.6kg",
+            "power": "4 pin AA",
+            "origin": "Hàn Quốc",
+            "price": 4750000,
+            "stock": 16,
+            "description": "Khóa cửa mở được bằng năm cách: vân tay, mã số, thẻ từ, ứng dụng và chìa cơ dự phòng — không còn cảnh đứng trước cửa vì quên chìa.\n\n• Cảm biến vân tay nhận dạng dưới 0,5 giây, lưu tới 100 vân tay khác nhau.\n• Mã số dùng một lần cấp cho khách hoặc người giúp việc, hết hạn tự hủy.\n• Cảnh báo khi nhập sai quá 5 lần, tự khóa trong 3 phút.\n• Báo pin yếu trước 30 ngày, có cổng sạc dự phòng ngay mặt khóa.\n• Lịch sử ra vào ghi lại đầy đủ, xem trên điện thoại.\n\nBảo hành 24 tháng, hỗ trợ lắp đặt tận nhà trong nội thành.",
+            "slug": "khoa-cua-van-tay-thong-minh",
+            "images": [
+                "1790178070-1-khoa-cua-van-tay-thong-minh.jpg"
+            ]
+        },
+        {
+            "category": "thiet-bi-thong-minh",
+            "name": "Chuông cửa có hình không dây",
+            "brand": "Ezviz",
+            "material": "Nhựa ABS chống tia UV",
+            "weight": "0.4kg",
+            "power": "Pin sạc 5200mAh",
+            "origin": "Trung Quốc",
+            "price": 1850000,
+            "stock": 22,
+            "description": "Chuông cửa gắn ngoài, thấy mặt khách trước khi mở cửa. Pin sạc dùng được khoảng bốn tháng nên không phải đi dây điện.\n\n• Góc nhìn rộng 166°, thấy trọn người đứng sát cửa lẫn gói hàng đặt dưới chân.\n• Chống nước chuẩn IP65, lắp ngoài trời không ngại mưa.\n• Tự ghi hình khi có người tới gần, kể cả khi họ không bấm chuông.\n• Trả lời khách ngay trên điện thoại dù đang ở cơ quan.\n\nBảo hành 24 tháng.",
+            "slug": "chuong-cua-co-hinh-khong-day",
+            "images": [
+                "1790178087-1-chuong-cua-co-hinh-khong-day.jpg"
+            ]
+        },
+        {
+            "category": "thiet-bi-thong-minh",
+            "name": "Loa thông minh trợ lý ảo",
+            "brand": "Sony",
+            "material": "Vải lưới và nhựa tái chế",
+            "weight": "1.1kg",
+            "power": "30W",
+            "origin": "Malaysia",
+            "price": 1690000,
+            "stock": 33,
+            "description": "Loa đặt bàn kiêm trung tâm điều khiển nhà thông minh: gọi tên là bật đèn, chỉnh điều hòa hay phát nhạc.\n\n• Âm thanh 360°, bass đủ dày cho phòng khoảng 20m².\n• Bốn micro thu xa, nghe được câu lệnh cả khi đang mở nhạc lớn.\n• Ghép đôi hai loa thành cặp stereo trái phải.\n• Kết nối Wifi và Bluetooth 5.0, chuyển nguồn phát không phải cắm lại.\n• Nút tắt micro vật lý cho những lúc cần riêng tư.\n\nBảo hành 12 tháng.",
+            "slug": "loa-thong-minh-tro-ly-ao",
+            "images": [
+                "1790178200-1-loa-thong-minh-tro-ly-ao.jpg"
+            ]
+        },
+        {
+            "category": "thiet-bi-thong-minh",
+            "name": "Máy chiếu mini full HD",
+            "brand": "Xiaomi",
+            "material": "Hợp kim nhôm",
+            "weight": "1.3kg",
+            "power": "65W",
+            "origin": "Trung Quốc",
+            "price": 6490000,
+            "stock": 11,
+            "description": "Máy chiếu nhỏ gọn cho hình 1080p lên tới 120 inch, biến bức tường trống thành màn hình xem phim.\n\n• Tự lấy nét và tự chỉnh méo hình, đặt lệch vẫn cho khung hình vuông vắn.\n• Đèn LED tuổi thọ khoảng 30.000 giờ, xem mỗi tối vài tiếng dùng được nhiều năm.\n• Hai loa 5W tích hợp, không cần nối loa ngoài cho nhu cầu cơ bản.\n• Có sẵn kho ứng dụng xem phim, cắm thêm HDMI hoặc USB đều được.\n• Chạy êm dưới 28dB, tiếng quạt không lấn tiếng phim.\n\nBảo hành 12 tháng.",
+            "slug": "may-chieu-mini-full-hd",
+            "images": [
+                "1790178236-1-may-chieu-mini-full-hd.jpg"
+            ]
+        },
+        {
+            "category": "thiet-bi-thong-minh",
+            "name": "Ổ cắm thông minh wifi",
+            "brand": "TP-Link",
+            "material": "Nhựa chống cháy",
+            "weight": "0.12kg",
+            "power": "2500W",
+            "origin": "Trung Quốc",
+            "price": 250000,
+            "stock": 120,
+            "description": "Ổ cắm cắm vào ổ điện sẵn có là biến thiết bị thường thành thiết bị hẹn giờ được — quạt, đèn, bình nóng lạnh hay máy lọc không khí.\n\n• Bật tắt từ xa qua ứng dụng, dù đang ở ngoài đường.\n• Hẹn giờ theo ngày trong tuần, ví dụ bật bình nóng lạnh trước giờ tắm.\n• Đo điện năng tiêu thụ, biết thiết bị nào ngốn điện nhất trong nhà.\n• Chịu tải 2500W, dùng được cho hầu hết đồ gia dụng.\n• Ra lệnh bằng giọng nói qua loa thông minh.\n\nBảo hành 24 tháng.",
+            "slug": "o-cam-thong-minh-wifi",
+            "images": [
+                "1790178287-1-o-cam-thong-minh-wifi.jpg"
+            ]
+        },
+        {
+            "category": "do-dien-gia-dung",
+            "name": "Máy giặt cửa trước 9kg inverter",
+            "brand": "Electrolux",
+            "material": "Thép sơn tĩnh điện",
+            "weight": "68kg",
+            "power": "2000W",
+            "origin": "Thái Lan",
+            "price": 11900000,
+            "stock": 9,
+            "description": "Máy giặt lồng ngang 9kg, đủ cho gia đình bốn đến sáu người, giặt được cả chăn mền mùa đông.\n\n• Động cơ inverter chạy êm, giặt ban đêm không ảnh hưởng phòng ngủ bên cạnh.\n• 14 chương trình giặt, có chế độ giặt nhanh 15 phút cho đồ mặc trong ngày.\n• Hơi nước khử mùi và làm mềm sợi vải, giảm công là ủi về sau.\n• Tự cân bằng lồng giặt, hạn chế rung khi vắt ở tốc độ cao.\n• Khóa trẻ em và tự ngắt khi cửa chưa đóng kín.\n\nBảo hành 24 tháng, riêng động cơ 10 năm.",
+            "slug": "may-giat-cua-truoc-9kg-inverter",
+            "images": [
+                "1790178129-1-may-giat-cua-truoc-9kg-inverter.jpg"
+            ]
+        },
+        {
+            "category": "do-dien-gia-dung",
+            "name": "Bàn ủi hơi nước cầm tay",
+            "brand": "Philips",
+            "material": "Nhựa chịu nhiệt",
+            "weight": "0.8kg",
+            "power": "1200W",
+            "origin": "Indonesia",
+            "price": 890000,
+            "stock": 45,
+            "description": "Bàn ủi hơi nước cầm tay, ủi thẳng trên móc treo mà không cần trải bàn ủi — tiện cho buổi sáng vội đi làm.\n\n• Làm nóng trong 30 giây, phun hơi liên tục 20g mỗi phút.\n• Bình nước 120ml đủ cho khoảng 8 phút ủi liên tục.\n• Mặt đế gốm trượt êm, không bắt dính sợi vải mỏng.\n• Tự ngắt khi đặt nằm quá 30 giây, an toàn khi lỡ quên.\n• Gấp gọn bỏ vừa vali, hợp mang theo khi công tác.\n\nBảo hành 12 tháng.",
+            "slug": "ban-ui-hoi-nuoc-cam-tay",
+            "images": [
+                "1790178149-1-ban-ui-hoi-nuoc-cam-tay.jpg"
+            ]
+        },
+        {
+            "category": "do-dien-gia-dung",
+            "name": "Tủ chăm sóc quần áo bằng hơi nước",
+            "brand": "LG",
+            "material": "Thép phủ sơn",
+            "weight": "82kg",
+            "power": "1600W",
+            "origin": "Hàn Quốc",
+            "price": 18500000,
+            "stock": 5,
+            "description": "Tủ dùng hơi nước nóng để khử mùi, diệt khuẩn và làm phẳng nếp nhăn cho đồ không tiện giặt thường xuyên như vest, áo khoác hay đồ len.\n\n• Thanh treo rung nhẹ giúp bụi rơi khỏi sợi vải trước khi phun hơi.\n• Chu trình khử khuẩn ở 60°C loại bỏ phần lớn vi khuẩn gây mùi.\n• Chế độ sấy khô bằng bơm nhiệt, không làm co rút vải len.\n• Treo cùng lúc 3 bộ vest hoặc 5 áo sơ mi.\n• Hẹn giờ và theo dõi tiến trình trên điện thoại.\n\nBảo hành 24 tháng, máy nén 10 năm.",
+            "slug": "tu-cham-soc-quan-ao-bang-hoi-nuoc",
+            "images": [
+                "1790178893-1-tu-say-quan-ao-bang-hoi-nuoc.jpg"
+            ]
+        },
+        {
+            "category": "do-dien-gia-dung",
+            "name": "Máy nước nóng trực tiếp có bơm",
+            "brand": "Panasonic",
+            "material": "Nhựa chịu nhiệt",
+            "weight": "2.8kg",
+            "power": "4500W",
+            "origin": "Việt Nam",
+            "price": 3490000,
+            "stock": 18,
+            "description": "Máy nước nóng trực tiếp, nước nóng ngay khi mở vòi, không phải chờ bình đun như loại gián tiếp.\n\n• Bơm trợ lực tích hợp, dùng tốt ở tầng cao hay nơi nước yếu.\n• Cầu dao chống giật ELCB ngắt điện trong 0,1 giây khi phát hiện rò.\n• Màn hình hiện nhiệt độ thực, chỉnh được từng độ một.\n• Cảm biến tự ngắt khi nước quá nóng hoặc mất nước đột ngột.\n\nBảo hành 24 tháng cho máy, 36 tháng cho sợi đốt.",
+            "slug": "may-nuoc-nong-truc-tiep-co-bom",
+            "images": [
+                "1790178108-1-may-nuoc-nong-truc-tiep-co-bom.jpg"
+            ]
+        },
+        {
+            "category": "noi-that-phong-tam",
+            "name": "Gương led chống hơi nước",
+            "brand": "Kohler",
+            "material": "Kính cường lực 5mm",
+            "weight": "7.5kg",
+            "power": "28W",
+            "origin": "Việt Nam",
+            "price": 2150000,
+            "stock": 14,
+            "description": "Gương soi viền led cảm ứng, có sấy chống mờ nên tắm xong vẫn soi được ngay.\n\n• Ba chế độ ánh sáng: trắng, trung tính và vàng ấm, đổi bằng một lần chạm.\n• Màng sấy phía sau làm tan hơi nước trong khoảng hai phút.\n• Kính cường lực phủ lớp chống gỉ viền, dùng lâu không ố cạnh.\n• Nguồn điện đi âm tường, mặt gương chỉ còn nút cảm ứng phẳng.\n\nBảo hành 24 tháng.",
+            "slug": "guong-led-chong-hoi-nuoc",
+            "images": [
+                "1790178404-1-guong-led-chong-hoi-nuoc.jpg"
+            ]
+        },
+        {
+            "category": "noi-that-phong-tam",
+            "name": "Tủ lavabo treo tường chống ẩm",
+            "brand": "Caesar",
+            "material": "Nhựa PVC lõi đặc",
+            "weight": "16kg",
+            "power": "Không dùng điện",
+            "origin": "Việt Nam",
+            "price": 3250000,
+            "stock": 12,
+            "description": "Tủ lavabo treo tường kèm chậu rửa và gương, gom chỗ cất đồ vệ sinh cá nhân vào một khối gọn thay vì bày khắp mặt bàn.\n\n• Thân tủ nhựa PVC lõi đặc, ngâm nước không mục, không cong vênh như gỗ công nghiệp.\n• Treo tường nên sàn phía dưới trống, lau dọn dễ và thoáng nước.\n• Hai cánh mở êm nhờ bản lề giảm chấn, đóng không phát tiếng.\n• Chậu rửa sứ men chống bám bẩn, đi kèm gương soi cùng bộ.\n• Bề rộng 80cm, vừa hầu hết phòng tắm căn hộ.\n\nBảo hành 24 tháng cho thân tủ, 12 tháng cho phụ kiện.",
+            "slug": "tu-lavabo-treo-tuong-chong-am",
+            "images": [
+                "1790178519-1-tu-lavabo-treo-tuong-chong-am.jpg"
+            ]
+        },
+        {
+            "category": "do-nha-bep",
+            "name": "Nồi chiên không dầu 6L",
+            "brand": "Lock&Lock",
+            "material": "Thép không gỉ",
+            "weight": "5.4kg",
+            "power": "1700W",
+            "origin": "Hàn Quốc",
+            "price": 1790000,
+            "stock": 28,
+            "description": "Nồi chiên không dầu dung tích 6L, chiên được nguyên con gà cỡ vừa mà vẫn giữ được lớp da giòn.\n\n• Luồng khí nóng đối lưu 360°, chín đều mà chỉ cần rất ít dầu.\n• 8 chế độ cài sẵn: khoai chiên, gà, cá, bánh, rau củ, sấy, hâm và nướng.\n• Giỏ chiên phủ chống dính, tháo rời rửa được bằng máy rửa bát.\n• Hẹn giờ 60 phút, tự tắt và báo chuông khi xong.\n• Rút giỏ ra là nồi tự ngừng, không lo bỏng hơi nóng.\n\nBảo hành 12 tháng.",
+            "slug": "noi-chien-khong-dau-6l",
+            "images": [
+                "1790178269-1-noi-chien-khong-dau-6l.jpg"
+            ]
+        }
+    ]
+}

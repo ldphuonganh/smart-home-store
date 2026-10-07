@@ -21,7 +21,8 @@ import vn.edu.smarthome.productservice.security.JwtAuthFilter;
  * - /public/products/**                : public ở tầng service; API Key + scope kiểm tra tại Gateway
  * - /internal/**                       : chỉ service nội bộ gọi; Gateway không định tuyến ra ngoài
  *                                        (giới hạn đã biết - xem docs/API_CONTRACT.md)
- * - POST/PUT/DELETE products, categories: chỉ ADMIN
+ * - POST /products/{id}/reviews        : CUSTOMER (đã mua & nhận hàng)
+ * - GET /products/admin, /products/reviews và POST/PUT/PATCH/DELETE: chỉ ADMIN
  */
 @Configuration
 @RequiredArgsConstructor
@@ -38,11 +39,15 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/internal/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/admin", "/products/reviews").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/products/*/reviews/eligibility", "/products/reviews/mine").authenticated()
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/public/products/**").permitAll()
-                        .requestMatchers("/internal/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/products/*/reviews").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.POST, "/products/**", "/categories/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/products/**", "/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/products/**", "/categories/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/products/**", "/categories/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
