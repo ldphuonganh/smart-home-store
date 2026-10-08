@@ -1,215 +1,263 @@
 # SMART HOME STORE
 
-## 1. Giới thiệu dự án
+## 1. Tổng quan
 
-**Smart Home Store** là hệ thống thương mại điện tử hỗ trợ việc kinh doanh và mua bán các sản phẩm nội thất, thiết bị nhà ở thông minh trên nền tảng trực tuyến.
+**Smart Home Store** là hệ thống thương mại điện tử được xây dựng trong học phần **Phát triển phần mềm hướng dịch vụ**. Hệ thống hỗ trợ khách hàng tìm kiếm sản phẩm, quản lý giỏ hàng, wishlist, checkout, đặt hàng và thanh toán; đồng thời cung cấp các chức năng quản trị cho tài khoản, sản phẩm, danh mục, đơn hàng, khuyến mãi và thanh toán.
 
-Dự án được xây dựng trong học phần **Phát triển phần mềm hướng dịch vụ**, sử dụng RESTful API và ứng dụng Client.
+Tên đề tài thống nhất của nhóm:
 
-Các chức năng chính của hệ thống gồm:
+> **Thiết kế và phát triển hệ thống thương mại điện tử Smarthome dựa trên RESTful API và ứng dụng Client**
 
-- Đăng ký và đăng nhập tài khoản.
-- Quản lý tài khoản người dùng.
-- Quản lý sản phẩm và danh mục sản phẩm.
-- Quản lý giỏ hàng và danh sách yêu thích.
-- Đặt hàng và Checkout.
-- Theo dõi lịch sử đơn hàng.
-- Quản lý đơn hàng dành cho quản trị viên.
-- Quản lý thanh toán.
-- Cung cấp RESTful API cho ứng dụng Client và các đối tác được cấp quyền.
+Hệ thống sử dụng các service độc lập theo domain nghiệp vụ, giao tiếp chủ yếu bằng RESTful API và sử dụng API Gateway làm điểm truy cập chung cho Frontend.
 
-## 2. Mục tiêu của dự án
+## 2. Công nghệ
 
-Dự án được thực hiện nhằm xây dựng một hệ thống thương mại điện tử có khả năng hỗ trợ các hoạt động mua bán sản phẩm nội thất và thiết bị nhà ở thông minh.
-
-Các mục tiêu chính bao gồm:
-
-- Xây dựng hệ thống thương mại điện tử có giao diện thân thiện với người dùng.
-- Áp dụng kiến trúc hướng dịch vụ trong quá trình phát triển phần mềm.
-- Xây dựng các RESTful API phục vụ cho ứng dụng Client.
-- Phân chia hệ thống thành các service theo từng nhóm chức năng nghiệp vụ.
-- Đảm bảo khả năng mở rộng và bảo trì hệ thống.
-- Áp dụng quy trình làm việc nhóm thông qua Git và GitHub.
-- Kiểm thử độc lập từng chức năng trước khi tích hợp toàn hệ thống.
-
-## 3. Thông tin dự án
-
-| Nội dung | Thông tin |
+| Thành phần | Công nghệ |
 |---|---|
-| Tên dự án | Smart Home Store |
-| Tên đề tài | Thiết kế và phát triển hệ thống thương mại điện tử Smarthome dựa trên RESTful API và ứng dụng Client |
-| Repository | smart-home-store |
-| Nền tảng | Web Application |
-| Backend | Java, Spring Boot |
-| Frontend | React, TypeScript, Vite |
-| Cơ sở dữ liệu | MySQL |
-| Giao tiếp | RESTful API |
+| Frontend | React + TypeScript + Vite |
+| Backend | Java + Spring Boot |
 | API Gateway | Spring Cloud Gateway |
+| Database | MySQL |
+| Giao tiếp | HTTP/REST + JSON |
+| Authentication | JWT |
+| API kiểm thử | Postman |
+| Frontend port | 5173 |
+| Gateway port | 8080 |
 
-## 4. Kiến trúc hệ thống
-
-Hệ thống được tổ chức thành các service theo từng nhóm chức năng nghiệp vụ. Người dùng tương tác với hệ thống thông qua ứng dụng Client. Các request từ Frontend được chuyển tiếp thông qua API Gateway đến service tương ứng.
-
-Kiến trúc tổng quát của hệ thống được mô tả như sau:
+## 3. Kiến trúc tổng thể
 
 ```text
-                         SMART HOME CLIENT
-                       React + TypeScript
-                            Port 5173
+                         React + TypeScript
+                              :5173
+                                |
+                              REST
                                 |
                                 v
-                           API GATEWAY
-                            Port 8080
-                                |
-        ---------------------------------------------------------
-        |                |                |                     |
-        v                v                v                     v
-  AUTH SERVICE     PRODUCT SERVICE    CART SERVICE       ORDER SERVICE
-    Port 8081         Port 8082         Port 8084           Port 8083
-        |                |                |                     |
-        v                v                v                     v
-     auth_db         product_db        cart_db              order_db
+                       +------------------+
+                       |   API Gateway    |
+                       |      :8080       |
+                       +------------------+
+                         /    |    |    \
+                        /     |    |     \
+                       v      v    v      v
+                    Auth   Product Cart   Order
+                    :8081   :8082  :8084  :8083
+                      |       |      |       |
+                   auth_db product cart_db order_db
+                              db
 
+                              |
+                              v
+                         Payment
+                          :8085
+                            |
+                       payment_db
+```
 
-                                |
-                                v
-                         PAYMENT SERVICE
-                            Port 8085
-                                |
-                                v
-                           payment_db
+### Nguyên tắc kiến trúc
 
-5. Cấu trúc thư mục dự án
-smart-home-store/
-├── api-gateway/
-├── auth-service/
-├── order-service/
-├── crs-frontend/
-├── docs/
-│   ├── README.md
-│   ├── API_CONTRACT.md
-│   ├── DATABASE_DESIGN.md
-│   └── DEVELOPMENT_CONVENTION.md
-└── .gitignore
-6. Phân công chức năng của các thành viên
-| Thành viên | Chức năng phụ trách             | Service                          |
-| ---------- | ------------------------------- | -------------------------------- |
-| TV1        | Auth, Account và Partner        | `auth-service`                   |
-| TV2        | Product, Category và Public API | `product-service`                |
-| TV3        | Cart và Wishlist                | `cart-service`                   |
-| TV4        | Order và Checkout               | `order-service`                  |
-| TV5        | Payment và API Gateway          | `payment-service`, `api-gateway` |
+- Mỗi service chịu trách nhiệm một domain nghiệp vụ riêng.
+- Mỗi service sở hữu database của mình.
+- Service không truy cập trực tiếp database của service khác.
+- Khi cần dữ liệu hoặc nghiệp vụ của service khác, service gọi API tương ứng.
+- Frontend gọi API thông qua Gateway thay vì gọi trực tiếp từng service.
+- Các API yêu cầu đăng nhập sử dụng JWT để xác thực và phân quyền.
+- Các API nội bộ giữa service không được công khai qua Gateway nếu không cần thiết.
 
-7. Các cổng dịch vụ
-| Thành phần      | Port |
-| --------------- | ---: |
-| API Gateway     | 8080 |
-| Auth Service    | 8081 |
-| Product Service | 8082 |
-| Order Service   | 8083 |
-| Cart Service    | 8084 |
-| Payment Service | 8085 |
-| Frontend        | 5173 |
+## 4. Các service
 
-8. Nguyên tắc phát triển dự án
+| Service | Port | Database | Trách nhiệm |
+|---|---:|---|---|
+| `api-gateway` | 8080 | - | Routing, CORS và điểm vào chung |
+| `auth-service` | 8081 | `auth_db` | Đăng ký, đăng nhập, tài khoản, JWT, role, địa chỉ, API Key |
+| `product-service` | 8082 | `product_db` | Sản phẩm, danh mục, tồn kho, hình ảnh, đánh giá, Public Product API |
+| `order-service` | 8083 | `order_db` | Order, Checkout, khuyến mãi, vận chuyển |
+| `cart-service` | 8084 | `cart_db` | Giỏ hàng và Wishlist |
+| `payment-service` | 8085 | `payment_db` | Giao dịch QR, VNPay, PayPal và đối soát thanh toán |
+| `crs-frontend` | 5173 | - | Giao diện Client |
 
-Trong quá trình phát triển, nhóm thống nhất áp dụng các nguyên tắc sau:
+## 5. Chức năng chính
 
-Mỗi thành viên làm việc trên một branch riêng.
-Không đẩy mã nguồn trực tiếp lên branch main.
-Mỗi thành viên phải có các commit thể hiện rõ phần công việc đã thực hiện.
-Tên branch cần thể hiện rõ chức năng hoặc nhiệm vụ được phụ trách.
-Commit cần có nội dung ngắn gọn, dễ hiểu và phản ánh đúng thay đổi.
-Backend cần được kiểm thử trước khi tích hợp với Frontend.
-Frontend gọi API thông qua API Gateway thay vì gọi trực tiếp đến các service.
-Mỗi service chỉ truy cập cơ sở dữ liệu của chính service đó.
-Các service giao tiếp với nhau thông qua API.
-Hạn chế chỉnh sửa các file thuộc phạm vi phụ trách của thành viên khác.
-Khi cần tích hợp mã nguồn, các thành viên sử dụng Pull Request.
-Không đưa mật khẩu cơ sở dữ liệu, JWT Secret, API Key hoặc các thông tin nhạy cảm lên repository công khai.
-Cần kiểm tra mã nguồn trước khi commit và push lên GitHub.
-9. Quy trình làm việc với Git và GitHub
+### Customer
 
-Quy trình làm việc cơ bản của mỗi thành viên gồm các bước:
+- Đăng ký, đăng nhập và quản lý tài khoản.
+- Quản lý địa chỉ giao hàng.
+- Xem, tìm kiếm và lọc sản phẩm.
+- Xem danh mục, thương hiệu và sản phẩm nổi bật.
+- Xem chi tiết sản phẩm.
+- Quản lý giỏ hàng.
+- Chọn/bỏ chọn sản phẩm trong giỏ.
+- Quản lý Wishlist.
+- Checkout và tính báo giá.
+- Đặt hàng.
+- Xem lịch sử và chi tiết đơn hàng.
+- Hủy/chỉnh sửa đơn theo trạng thái cho phép.
+- Theo dõi đơn bằng mã đơn và số điện thoại.
+- Thanh toán theo phương thức được hệ thống hỗ trợ.
+- Xem và gửi đánh giá sản phẩm khi đủ điều kiện.
 
-Cập nhật mã nguồn mới nhất từ branch main.
-Chuyển sang branch cá nhân của mình.
-Thực hiện phát triển chức năng được phân công.
-Kiểm thử chức năng trên máy cá nhân.
-Commit các thay đổi lên branch cá nhân.
-Push branch lên repository GitHub.
-Tạo Pull Request để đề xuất tích hợp mã nguồn vào branch main.
-Các thành viên kiểm tra thay đổi trước khi tiến hành merge.
+### Admin
 
-Mỗi thành viên cần đảm bảo phần đóng góp của mình được thể hiện thông qua lịch sử commit trên GitHub.
+- Quản lý tài khoản và trạng thái người dùng.
+- Quản lý role.
+- Quản lý sản phẩm, danh mục và hình ảnh.
+- Quản lý đánh giá.
+- Quản lý đơn hàng và trạng thái đơn.
+- Xác nhận thanh toán/hoàn tiền theo nghiệp vụ.
+- Quản lý mã giảm giá.
+- Theo dõi các giao dịch thanh toán.
+- Quản lý API Key/Partner theo phạm vi được triển khai.
 
-10. Thứ tự khởi động hệ thống
+## 6. Giao tiếp giữa các service
 
-Thứ tự khởi động hệ thống được đề xuất như sau:
+Ví dụ luồng Checkout:
 
-Auth Service.
-Product Service.
-Cart Service.
-Order Service.
-Payment Service.
-API Gateway.
-Frontend.
+```text
+Customer
+   |
+   v
+Frontend :5173
+   |
+   v
+Gateway :8080
+   |
+   v
+Order Service :8083
+   |
+   | REST API
+   v
+Product Service :8082
+   |
+   v
+product_db
 
-Trong quá trình phát triển, các service chưa hoàn thành có thể được chạy độc lập để phục vụ việc kiểm thử từng chức năng.
+Nếu giữ tồn kho thành công:
+   |
+   v
+Order Service tạo Order + OrderItem
+   |
+   v
+order_db
 
-Sau khi các service được hoàn thiện, nhóm tiến hành khởi động toàn bộ hệ thống để kiểm thử tích hợp.
+Nếu tạo đơn thất bại sau khi đã giữ kho:
+   |
+   v
+Order Service gọi Product Service
+release-stock
+```
 
-11. Kiểm thử hệ thống
+`Order Service` không truy cập `product_db` trực tiếp. `Product Service` là service sở hữu thông tin sản phẩm và tồn kho.
 
-Nhóm dự kiến sử dụng các công cụ và phương pháp sau để kiểm thử hệ thống:
+## 7. Phân công
 
-Kiểm thử RESTful API bằng Postman.
-Kiểm tra mã trạng thái HTTP.
-Kiểm tra dữ liệu đầu vào và dữ liệu trả về.
-Kiểm tra chức năng đăng ký và đăng nhập.
-Kiểm tra xác thực và phân quyền người dùng.
-Kiểm tra các trường hợp dữ liệu hợp lệ và không hợp lệ.
-Kiểm tra các trường hợp thiếu dữ liệu bắt buộc.
-Kiểm tra xử lý lỗi của từng service.
-Kiểm thử tích hợp giữa các service.
-Kiểm thử chức năng Frontend.
-Kiểm thử End-to-End sau khi hoàn thành quá trình tích hợp.
+| Thành viên | Phạm vi |
+|---|---|
+| TV1 | Auth, Account, Partner/API Key |
+| TV2 | Product, Category, Public Product API |
+| TV3 | Cart, Wishlist |
+| TV4 | Order, Checkout |
+| TV5 | Payment, API Gateway |
 
-12. Tài liệu dự án
+## 8. Git/GitHub
 
-Thư mục docs/ chứa các tài liệu dùng chung của nhóm.
-| Tài liệu                    | Nội dung                                             |
-| --------------------------- | ---------------------------------------------------- |
-| `README.md`                 | Thông tin tổng quan và hướng dẫn sử dụng dự án       |
-| `API_CONTRACT.md`           | Quy ước API, request, response và mã trạng thái HTTP |
-| `DATABASE_DESIGN.md`        | Thiết kế cơ sở dữ liệu của hệ thống                  |
-| `DEVELOPMENT_CONVENTION.md` | Quy tắc code, branch, commit và quy trình phát triển |
-13. Trạng thái phát triển dự án
+Nhóm sử dụng branch riêng cho từng phần chức năng và tích hợp thông qua Pull Request.
 
-Dự án được triển khai theo các giai đoạn sau:
+Branch của phần Order + Checkout:
 
-Phân tích yêu cầu nghiệp vụ.
-Xác định chức năng của từng thành viên.
-Thiết kế kiến trúc hệ thống.
-Thiết kế cơ sở dữ liệu.
-Thống nhất quy ước API và quy tắc phát triển.
-Phát triển các service theo chức năng được phân công.
-Kiểm thử độc lập từng service.
-Phát triển và kết nối Frontend.
-Tích hợp các branch thông qua Pull Request.
-Kết nối các service thông qua API Gateway.
-Kiểm thử tích hợp toàn hệ thống.
-Hoàn thiện tài liệu và chuẩn bị báo cáo.
-14. Định hướng phát triển
+```text
+feature/order-service
+```
 
-Trong các giai đoạn tiếp theo, nhóm sẽ tiếp tục:
+Quy trình:
 
-Hoàn thiện các service theo chức năng được phân công.
-Bổ sung các chức năng còn thiếu của hệ thống.
-Hoàn thiện giao diện ứng dụng Client.
-Tăng cường kiểm thử API và kiểm thử tích hợp.
-Cải thiện khả năng xử lý lỗi.
-Hoàn thiện cơ chế xác thực và phân quyền.
-Bổ sung tài liệu hướng dẫn cài đặt và sử dụng.
-Đánh giá và cải thiện hiệu năng hệ thống.
-Chuẩn bị nội dung báo cáo, slide và phần trình diễn sản phẩm.
+```text
+Branch cá nhân
+    ↓
+Phát triển
+    ↓
+Test
+    ↓
+Commit
+    ↓
+Push
+    ↓
+Pull Request
+    ↓
+Review
+    ↓
+Merge
+```
+
+## 9. Kiểm thử
+
+Hệ thống được kiểm thử ở nhiều mức:
+
+- Kiểm thử API bằng Postman.
+- Kiểm tra HTTP status code.
+- Kiểm tra validation dữ liệu.
+- Kiểm tra authentication/authorization.
+- Kiểm tra xử lý lỗi.
+- Kiểm thử từng service độc lập.
+- Kiểm thử giao tiếp giữa các service.
+- Kiểm thử Frontend.
+- Kiểm thử tích hợp qua API Gateway.
+- Kiểm thử các luồng nghiệp vụ chính End-to-End.
+
+## 10. Các điểm kỹ thuật đáng chú ý
+
+### Ownership dữ liệu
+
+Mỗi service sở hữu dữ liệu thuộc domain của mình. Service khác sử dụng API thay vì truy cập database trực tiếp.
+
+### Snapshot OrderItem
+
+Khi đặt hàng, `OrderItem` lưu tên, giá và thông tin sản phẩm tại thời điểm đặt hàng. Vì vậy thay đổi giá sản phẩm sau này không làm thay đổi lịch sử đơn hàng cũ.
+
+### Kiểm soát tồn kho
+
+Product Service xử lý nghiệp vụ giữ/trả tồn kho. Việc cập nhật tồn kho được thực hiện ở Product Service để tránh việc Order Service tự thao tác vào `product_db`.
+
+### IDOR
+
+Khi khách xem đơn hàng, backend lấy người dùng từ JWT và kiểm tra quyền sở hữu đơn hàng trước khi trả dữ liệu.
+
+### Distributed consistency
+
+Order, Product và Payment sử dụng các database khác nhau. Vì vậy các nghiệp vụ đi qua nhiều service cần xử lý lỗi, timeout và compensation phù hợp. Hệ thống hiện có xử lý hoàn tồn kho trong một số trường hợp, nhưng chưa phải một Saga hoàn chỉnh.
+
+### Idempotency
+
+Các nghiệp vụ tạo đơn cần tránh việc cùng một yêu cầu được xử lý nhiều lần. Đây là một điểm cần tiếp tục tăng cường nếu hệ thống được phát triển thêm.
+
+## 11. Trạng thái hoàn thành
+
+Các thành phần chính của hệ thống đã được triển khai và tích hợp:
+
+```text
+Auth
+  ↓
+Product
+  ↓
+Cart / Wishlist
+  ↓
+Order / Checkout
+  ↓
+Payment
+  ↓
+API Gateway
+  ↓
+React Client
+```
+
+Dự án hiện ở giai đoạn **hoàn thiện và tích hợp hệ thống**, sẵn sàng cho kiểm thử tổng thể, báo cáo và trình diễn.
+
+## 12. Định hướng cải tiến
+
+Một số hướng có thể tiếp tục phát triển:
+
+- Hoàn thiện cơ chế idempotency cho các thao tác quan trọng.
+- Tăng cường timeout/retry giữa các service.
+- Áp dụng Saga/Compensating Transaction cho các nghiệp vụ phân tán phức tạp.
+- Bổ sung kiểm thử concurrency cho tồn kho.
+- Hoàn thiện monitoring và logging tập trung.
+- Bổ sung CI/CD và kiểm thử tự động.

@@ -1,281 +1,374 @@
 # API CONTRACT
 
+Tài liệu này mô tả các API chính của Smart Home Store ở mức Gateway và các API nội bộ quan trọng.
+
 ## 1. Quy ước chung
 
-### 1.1. Địa chỉ API
-
-Khi tích hợp hoàn chỉnh, Client gọi API thông qua API Gateway:
+Gateway:
 
 ```text
 http://localhost:8080
 ```
 
-Trong quá trình phát triển độc lập, Order Service có thể được kiểm thử trực tiếp tại:
+Frontend:
 
 ```text
-http://localhost:8083
+http://localhost:5173
 ```
 
-### 1.2. Header
+Các service:
 
-Đối với request JSON:
+```text
+auth-service     http://localhost:8081
+product-service  http://localhost:8082
+order-service    http://localhost:8083
+cart-service     http://localhost:8084
+payment-service  http://localhost:8085
+```
+
+Request JSON:
 
 ```http
 Content-Type: application/json
 ```
 
-Đối với API yêu cầu đăng nhập:
+API yêu cầu đăng nhập:
 
 ```http
 Authorization: Bearer <JWT_TOKEN>
 ```
 
-### 1.3. Mã phản hồi HTTP
+### HTTP status thường dùng
 
-| Mã | Ý nghĩa |
+| Status | Ý nghĩa |
 |---:|---|
-| 200 | Yêu cầu thành công |
+| 200 | Thành công |
 | 201 | Tạo dữ liệu thành công |
 | 400 | Dữ liệu đầu vào không hợp lệ |
-| 401 | Chưa xác thực hoặc token không hợp lệ |
-| 403 | Không có quyền thực hiện |
+| 401 | Chưa xác thực/token không hợp lệ |
+| 403 | Không có quyền |
 | 404 | Không tìm thấy dữ liệu |
+| 409 | Xung đột nghiệp vụ, ví dụ hết hàng |
 | 500 | Lỗi máy chủ |
 
-# 2. API của Order Service
+## 2. Auth API
 
-## 2.1. Tạo đơn hàng
+Gateway prefix:
 
-```http
+```text
+/api/auth/**
+```
+
+| Method | Endpoint | Chức năng |
+|---|---|---|
+| POST | `/api/auth/register` | Đăng ký |
+| POST | `/api/auth/login` | Đăng nhập |
+| POST | `/api/auth/forgot-password` | Quên mật khẩu |
+| POST | `/api/auth/reset-password` | Đặt lại mật khẩu |
+| GET | `/api/auth/me` | Lấy tài khoản hiện tại |
+| PUT | `/api/auth/me` | Cập nhật tài khoản |
+| PUT | `/api/auth/me/password` | Đổi mật khẩu |
+
+Các chức năng quản lý địa chỉ:
+
+```text
+PUT    /api/auth/addresses/{id}
+PUT    /api/auth/addresses/{id}/default
+DELETE /api/auth/addresses/{id}
+```
+
+Admin:
+
+```text
+PUT    /api/admin/users/{id}/status
+PUT    /api/admin/users/{id}/toggle-role
+DELETE /api/admin/users/{id}
+```
+
+API Key:
+
+```text
+DELETE /api/api-keys/{id}
+```
+
+## 3. Product API
+
+| Method | Endpoint | Chức năng |
+|---|---|---|
+| GET | `/api/products/{id}` | Chi tiết sản phẩm |
+| GET | `/api/products/slug/{slug}` | Chi tiết theo slug |
+| GET | `/api/products/brands` | Danh sách thương hiệu |
+| GET | `/api/products/best-sellers` | Sản phẩm bán chạy |
+| GET | `/api/products/latest` | Sản phẩm mới |
+| GET | `/api/products/{id}/related` | Sản phẩm liên quan |
+| GET | `/api/products/{id}/reviews` | Đánh giá sản phẩm |
+| GET | `/api/products/reviews` | Danh sách đánh giá |
+| GET | `/api/products/reviews/mine` | Đánh giá của người dùng |
+| POST | `/api/products/{id}/reviews` | Gửi đánh giá |
+| DELETE | `/api/products/reviews/{reviewId}` | Xóa đánh giá |
+| PATCH | `/api/products/reviews/{reviewId}/toggle` | Ẩn/hiện đánh giá |
+
+Các API quản trị sản phẩm bao gồm tạo, sửa, xóa, bật/tắt trạng thái và quản lý hình ảnh.
+
+Category:
+
+```text
+GET    /api/categories/{id}
+GET    /api/categories/slug/{slug}
+PUT    /api/categories/{id}
+DELETE /api/categories/{id}
+```
+
+Public Product API:
+
+```text
+GET /api/public/products/{id}
+```
+
+## 4. Cart và Wishlist API
+
+### Cart
+
+```text
+POST   /api/cart/items
+PUT    /api/cart/items/{id}
+DELETE /api/cart/items/{id}
+PATCH  /api/cart/items/{id}/select
+PUT    /api/cart/select-all
+DELETE /api/cart/selected
+```
+
+### Wishlist
+
+```text
+GET    /api/wishlist/ids
+POST   /api/wishlist/toggle/{productId}
+POST   /api/wishlist/items
+DELETE /api/wishlist/items/{id}
+DELETE /api/wishlist/products/{productId}
+```
+
+## 5. Order và Checkout API
+
+### Customer
+
+```text
+POST /api/orders/quote
 POST /api/orders
+GET  /api/orders/my
+GET  /api/orders/last-payment
+GET  /api/orders/{id}
+PUT  /api/orders/{id}
+PUT  /api/orders/{id}/cancel
+POST /api/orders/track
 ```
 
-**Quyền truy cập:** CUSTOMER đã đăng nhập.
+### Admin
 
-**Request Body mẫu:**
-
-```json
-{
-  "shippingAddress": "123 Nguyễn Trãi, Quận 1, TP.HCM",
-  "phone": "0901234567",
-  "paymentMethod": "COD",
-  "items": [
-    {
-      "productId": 1,
-      "quantity": 2
-    }
-  ]
-}
+```text
+GET    /api/orders/admin/dashboard
+GET    /api/orders/admin/{id}
+PUT    /api/orders/admin/{id}/status
+PUT    /api/orders/admin/{id}/confirm-payment
+PUT    /api/orders/admin/{id}/refunded
+DELETE /api/orders/admin/{id}
 ```
 
-| Trường | Kiểu dữ liệu | Bắt buộc | Mô tả |
-|---|---|---|---|
-| shippingAddress | String | Có | Địa chỉ giao hàng |
-| phone | String | Có | Số điện thoại nhận hàng |
-| paymentMethod | String | Có | Phương thức thanh toán |
-| items | Array | Có | Danh sách sản phẩm |
-| productId | Integer | Có | Mã sản phẩm |
-| quantity | Integer | Có | Số lượng sản phẩm |
+### Promotion
 
-**Response thành công:** `201 Created`
-
-```json
-{
-  "id": 1,
-  "customerId": 2,
-  "shippingAddress": "123 Nguyễn Trãi, Quận 1, TP.HCM",
-  "phone": "0901234567",
-  "paymentMethod": "COD",
-  "status": "PENDING",
-  "totalAmount": 25980000,
-  "items": [
-    {
-      "productId": 1,
-      "productName": "Smart Sofa",
-      "price": 12990000,
-      "quantity": 2
-    }
-  ]
-}
+```text
+GET    /api/promotions/available
+GET    /api/promotions/{id}
+PUT    /api/promotions/{id}
+PUT    /api/promotions/{id}/toggle
+DELETE /api/promotions/{id}
 ```
 
-## 2.2. Xem đơn hàng của khách hàng
+### Shipping
 
-```http
-GET /api/orders/my
+```text
+GET  /api/shipping/config
+GET  /api/shipping/provinces
+GET  /api/shipping/districts
+GET  /api/shipping/wards
+POST /api/shipping/services
 ```
 
-**Quyền truy cập:** CUSTOMER đã đăng nhập.
+### Trạng thái Order
 
-**Response thành công:** `200 OK`
-
-```json
-[
-  {
-    "id": 1,
-    "customerId": 2,
-    "shippingAddress": "123 Nguyễn Trãi, Quận 1, TP.HCM",
-    "phone": "0901234567",
-    "paymentMethod": "COD",
-    "status": "PENDING",
-    "totalAmount": 25980000,
-    "items": [
-      {
-        "productId": 1,
-        "productName": "Smart Sofa",
-        "price": 12990000,
-        "quantity": 2
-      }
-    ]
-  }
-]
+```text
+PENDING
+CONFIRMED
+SHIPPING
+COMPLETED
+CANCELLED
 ```
 
-## 2.3. Xem tất cả đơn hàng
+Luồng chuyển trạng thái được giới hạn theo nghiệp vụ, không cho phép nhảy tùy ý giữa mọi trạng thái.
 
-```http
-GET /api/orders
+### Trạng thái Payment của Order
+
+```text
+UNPAID
+PENDING_VERIFICATION
+PAID
+FAILED
+REFUND_PENDING
+REFUNDED
 ```
 
-**Quyền truy cập:** ADMIN đã đăng nhập.
+## 6. Payment API
 
-**Response thành công:** `200 OK`
-
-```json
-[
-  {
-    "id": 1,
-    "customerId": 2,
-    "shippingAddress": "123 Nguyễn Trãi, Quận 1, TP.HCM",
-    "phone": "0901234567",
-    "paymentMethod": "COD",
-    "status": "PENDING",
-    "totalAmount": 25980000
-  }
-]
+```text
+GET  /api/payments/config
+GET  /api/payments/qr/{orderId}
+POST /api/payments/qr/{orderId}/sandbox-pay
+GET  /api/payments/qr/{orderId}/status
+POST /api/payments/qr/{orderId}/transferred
+POST /api/payments/webhooks/sepay
+POST /api/payments/vnpay/{orderId}
+GET  /api/payments/vnpay/return
+GET  /api/payments/vnpay/ipn
+POST /api/payments/paypal/{orderId}
+POST /api/payments/paypal/capture
+GET  /api/payments/order/{orderId}
 ```
 
-## 2.4. Xem chi tiết đơn hàng
+Payment Service lưu giao dịch trong `payment_db`.
 
-```http
-GET /api/orders/{id}
+Các phương thức hiện được thể hiện trong code gồm:
+
+```text
+QR / chuyển khoản
+VNPay
+PayPal
 ```
 
-**Quyền truy cập:**
+## 7. API nội bộ giữa các service
 
-- CUSTOMER chỉ được xem đơn hàng của mình.
-- ADMIN được xem tất cả đơn hàng.
+### Product Service
 
-**Ví dụ:**
+Các endpoint nội bộ:
 
-```http
-GET /api/orders/1
+```text
+GET   /internal/products/{id}
+PATCH /internal/products/{id}/reserve-stock
+PATCH /internal/products/{id}/release-stock
+PATCH /internal/products/{id}/sold
 ```
 
-**Response thành công:** `200 OK`
+Các endpoint này phục vụ giao tiếp giữa service, không phải API chính cho Frontend.
 
-```json
-{
-  "id": 1,
-  "customerId": 2,
-  "shippingAddress": "123 Nguyễn Trãi, Quận 1, TP.HCM",
-  "phone": "0901234567",
-  "paymentMethod": "COD",
-  "status": "PENDING",
-  "totalAmount": 25980000,
-  "items": [
-    {
-      "productId": 1,
-      "productName": "Smart Sofa",
-      "price": 12990000,
-      "quantity": 2
-    }
-  ]
-}
+Ví dụ Checkout:
+
+```text
+Order Service
+    |
+    | PATCH /internal/products/{id}/reserve-stock
+    v
+Product Service
 ```
 
-## 2.5. Hủy đơn hàng
+### Order Service
 
-```http
-PUT /api/orders/{id}/cancel
+Payment Service có thể gọi các endpoint nội bộ liên quan đến trạng thái thanh toán:
+
+```text
+GET /internal/orders/{id}
+GET /internal/orders/by-number/{orderNumber}
+PUT /internal/orders/{id}/paid
+PUT /internal/orders/{id}/payment-status
+GET /internal/orders/purchased
+GET /internal/orders/users/{userId}/active-count
 ```
 
-**Quyền truy cập:** CUSTOMER đã đăng nhập.
+## 8. API Gateway routing
 
-**Ví dụ:**
+Gateway định tuyến các nhóm chính:
 
-```http
-PUT /api/orders/1/cancel
+```text
+/api/auth/**       -> auth-service
+/api/admin/**      -> auth-service
+/api/api-keys/**   -> auth-service
+
+/api/products/**   -> product-service
+/api/categories/** -> product-service
+/api/public/products/** -> product-service
+
+/api/cart/**       -> cart-service
+/api/wishlist/**   -> cart-service
+
+/api/orders/**     -> order-service
+/api/shipping/**   -> order-service
+/api/promotions/** -> order-service
+
+/api/payments/**   -> payment-service
 ```
 
-Đơn hàng chỉ được hủy khi còn ở trạng thái cho phép hủy, thông thường là `PENDING`. Không cho phép hủy đơn hàng đã `COMPLETED`.
+Frontend chỉ cần biết Gateway:
 
-**Response thành công:** `200 OK`
-
-```json
-{
-  "id": 1,
-  "status": "CANCELLED",
-  "message": "Hủy đơn hàng thành công"
-}
+```text
+React :5173
+    |
+    v
+Gateway :8080
 ```
 
-## 2.6. Cập nhật trạng thái đơn hàng
+thay vì phải biết địa chỉ của từng service.
 
-```http
-PUT /api/orders/{id}/status
+## 9. Luồng Checkout chính
+
+```text
+POST /api/orders
+      |
+      v
+API Gateway
+      |
+      v
+OrderController
+      |
+      v
+OrderService.createOrder()
+      |
+      v
+ProductClient
+      |
+      v
+Product Service
+      |
+      +--> kiểm tra sản phẩm
+      |
+      +--> reserve-stock
+      |
+      v
+OrderService
+      |
+      +--> tạo Order
+      +--> tạo OrderItem snapshot
+      |
+      v
+order_db
 ```
 
-**Quyền truy cập:** ADMIN đã đăng nhập.
+Nếu tạo đơn thất bại sau khi đã giữ kho:
 
-**Request Body:**
-
-```json
-{
-  "status": "CONFIRMED"
-}
+```text
+OrderService
+    |
+    v
+releaseStock()
+    |
+    v
+Product Service
+    |
+    v
+release-stock
 ```
 
-**Các trạng thái hợp lệ:**
+## 10. Bảo mật
 
-- `PENDING`
-- `CONFIRMED`
-- `SHIPPING`
-- `COMPLETED`
-- `CANCELLED`
-
-**Response thành công:** `200 OK`
-
-```json
-{
-  "id": 1,
-  "status": "CONFIRMED",
-  "message": "Cập nhật trạng thái đơn hàng thành công"
-}
-```
-
-# 3. Bảng tổng hợp API
-
-| STT | Phương thức | Endpoint | Đối tượng sử dụng | Chức năng |
-|---:|---|---|---|---|
-| 1 | POST | `/api/orders` | CUSTOMER | Tạo đơn hàng |
-| 2 | GET | `/api/orders/my` | CUSTOMER | Xem đơn hàng của bản thân |
-| 3 | GET | `/api/orders` | ADMIN | Xem tất cả đơn hàng |
-| 4 | GET | `/api/orders/{id}` | CUSTOMER, ADMIN | Xem chi tiết đơn hàng |
-| 5 | PUT | `/api/orders/{id}/cancel` | CUSTOMER | Hủy đơn hàng |
-| 6 | PUT | `/api/orders/{id}/status` | ADMIN | Cập nhật trạng thái đơn hàng |
-
-# 4. Quy tắc nghiệp vụ
-
-- Người dùng phải đăng nhập khi tạo hoặc xem đơn hàng cá nhân.
-- Đơn hàng phải có ít nhất một sản phẩm.
-- Số lượng sản phẩm phải lớn hơn 0.
-- Địa chỉ giao hàng không được để trống.
-- Tổng tiền được tính dựa trên giá và số lượng sản phẩm.
-- Tên sản phẩm và giá sản phẩm được lưu dưới dạng snapshot tại thời điểm đặt hàng.
-- CUSTOMER chỉ được xem đơn hàng của chính mình.
-- ADMIN có thể xem và quản lý tất cả đơn hàng.
-- Trạng thái đơn hàng phải thuộc danh sách trạng thái đã quy định.
-- Khi API thay đổi, tài liệu này phải được cập nhật.
-
-> Lưu ý: Endpoint và cấu trúc JSON cần được đối chiếu lại với Controller/DTO thực tế trước khi tích hợp chính thức.
+- JWT được sử dụng cho các API cần xác thực.
+- `customerId/userId` của nghiệp vụ Order lấy từ người dùng đã xác thực, không tin một `userId` tùy ý do client gửi.
+- CUSTOMER chỉ được xem/chỉnh sửa đơn thuộc quyền của mình.
+- ADMIN có quyền quản lý đơn theo nghiệp vụ.
+- API nội bộ giữa service không nên được công khai qua Gateway nếu không cần thiết.
